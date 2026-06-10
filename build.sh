@@ -10,3 +10,6 @@ python manage.py collectstatic --no-input
 
 # Run database schema migrations
 python manage.py migrate
+
+# Create your admin credentials
+python manage.py create_admin
