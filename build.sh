@@ -2,11 +2,11 @@
 # exit on error
 set -o errexit
 
-# Install packages
+# Install project packages
 pip install -r requirements.txt
 
-# Collect Static files
+# Collect static files for Django Admin layouts
 python manage.py collectstatic --no-input
 
-# Run migrations
+# Run database schema migrations
 python manage.py migrate
