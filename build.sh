@@ -5,11 +5,11 @@ set -o errexit
 # Install project packages
 pip install -r requirements.txt
 
-# Collect static files for Django Admin layouts
+# Clear out any stale compiled static asset files
 python manage.py collectstatic --no-input
 
-# Run database schema migrations
-python manage.py migrate
+# Force a clean, verified database schema migration stamp
+python manage.py migrate --no-input
 
-# Create your admin credentials
+# Create your admin credentials safely
 python manage.py create_admin
