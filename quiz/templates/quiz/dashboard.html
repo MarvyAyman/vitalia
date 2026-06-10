@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+
+  :root {
+    --primary-blue: #387CEE;
+    --dark-navy: #02013A;
+    --bg-light: #F8FAFC;
+    --white: #FFFFFF;
+    --text-main: var(--dark-navy);
+    --text-muted: rgba(2, 1, 58, 0.6);
+    --blue-light: rgba(56, 124, 238, 0.1);
+    --green-bg: #ecfdf5;
+    --border-color: rgba(2, 1, 58, 0.1);
+    --font-family: 'PP Mori', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .dashboard-container {
+    font-family: var(--font-family);
+    color: var(--text-main);
+    background-color: var(--bg-light);
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  .weight-extralight { font-weight: 200; }
+  .weight-regular { font-weight: 400; }
+  .weight-semibold { font-weight: 600; }
+
+  .card-custom {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(2, 1, 58, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(2, 1, 58, 0.08);
+  }
+
+  .btn-primary-custom {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 12px 32px;
+    border-radius: 100px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.2s;
+    border: none;
+  }
+
+  .btn-primary-custom:hover {
+    opacity: 0.9;
+    color: var(--white);
+  }
+
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .badge-category {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: block;
+  }
+</style>
+
+<div class="dashboard-container">
+  <div style="margin-bottom: 48px;">
+    <h1 class="weight-semibold" style="font-size: 42px; margin-bottom: 8px; color: var(--dark-navy);">
+      Welcome back, {{ user.first_name|default:user.username }}
+    </h1>
+    <p class="weight-extralight" style="font-size: 18px; color: var(--text-muted);">
+      Institutional Stream: <span class="weight-regular" style="color: var(--dark-navy);">{{ user_university.name }} — {{ user_year.name }}</span>
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start;">
+    
+    <div style="display: flex; flex-direction: column; gap: 32px;">
+      
+      <!-- MCQ Bank Card -->
+      <div class="card-custom">
+        <div class="icon-box" style="background: var(--blue-light); color: var(--primary-blue);">🧬</div>
+        <h2 class="weight-semibold" style="font-size: 24px; margin: 0 0 12px 0;">Adaptive MCQ Bank</h2>
+        <p class="weight-regular" style="color: var(--text-muted); margin: 0 0 24px 0; font-size: 1rem; line-height: 1.6;">
+          Access your academic streams, configure custom testing criteria, and complete clinical exams to track your performance metrics over time.
+        </p>
+        <a href="{% url 'quiz:quiz_config' %}" class="btn-primary-custom">
+          Open MCQ Filter Console
+        </a>
+      </div>
+
+      <!-- Clinical Simulator Card -->
+      <div class="card-custom">
+        <div class="icon-box" style="background: rgba(2, 1, 58, 0.05); color: var(--dark-navy);">🩺</div>
+        <h2 class="weight-semibold" style="font-size: 24px; margin: 0 0 12px 0;">Clinical Case Diagnosis Simulator</h2>
+        <p class="weight-regular" style="color: var(--text-muted); margin: 0 0 24px 0; font-size: 1rem; line-height: 1.6;">
+          Analyze real-world diagnostic presentations. Uncover progressive hints step-by-step, test your medical terms index, and verify therapeutic plans.
+        </p>
+        <a href="{% url 'quiz:diagnosis_simulator' %}" class="btn-primary-custom" style="background-color: var(--dark-navy);">
+          Launch Clinical Simulator
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Sidebar Section -->
+    <div style="display: flex; flex-direction: column; gap: 32px;">
+      <div class="card-custom" style="padding: 24px;">
+        <h3 class="weight-semibold" style="font-size: 20px; margin-bottom: 20px; color: var(--dark-navy);">Recent Bookmarks</h3>
+        
+        {% if saved_bookmarks %}
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            {% for bookmark in saved_bookmarks %}
+              <div style="background: var(--bg-light); border-left: 4px solid var(--primary-blue); padding: 16px; border-radius: 12px;">
+                <span class="badge-category">
+                  {{ bookmark.question.course.name }}
+                </span>
+                <p class="weight-semibold" style="font-size: 0.95rem; color: var(--dark-navy); margin-bottom: 8px; line-height: 1.4;">
+                  {{ bookmark.question.question_text|truncatechars:60 }}
+                </p>
+                <p class="weight-regular" style="font-size: 0.85rem; color: var(--text-muted); background: var(--white); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 12px; font-style: italic;">
+                  "{{ bookmark.student_note|default:'No notes added.' }}"
+                </p>
+                
+                <button type="button" 
+                        onclick="openReviewSidebar('{{ bookmark.question.question_text|escapejs }}', '{{ bookmark.question.option_a|escapejs }}', '{{ bookmark.question.option_b|escapejs }}', '{{ bookmark.question.option_c|escapejs }}', '{{ bookmark.question.option_d|escapejs }}', '{{ bookmark.question.correct_option|escapejs }}', '{{ bookmark.question.explanation|escapejs }}', '{{ bookmark.student_note|escapejs }}')"
+                        style="background: transparent; border:none; padding: 0; font-size: 0.85rem; font-weight: 600; color: var(--primary-blue); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                  Review Case &rarr;
+                </button>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="weight-regular" style="font-size: 0.9rem; color: var(--text-muted); text-align: center; padding: 40px 0;">
+            Your saved bookmarks will appear here.
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Sidebar (Slide-out) -->
+  <div id="sidebarBackdrop" onclick="closeReviewSidebar()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2,1,58,0.4); z-index: 999; backdrop-filter: blur(4px); transition: all 0.3s ease;"></div>
+
+  <div id="reviewSidebar" style="position: fixed; top: 0; right: -500px; width: 480px; height: 100%; background: var(--white); box-shadow: -10px 0 40px rgba(2,1,58,0.1); z-index: 1000; transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; overflow: hidden;">
+    <div style="padding: 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-light);">
+      <div>
+        <h3 class="weight-semibold" style="font-size: 20px; margin: 0; color: var(--dark-navy);">Question Context</h3>
+        <span class="weight-regular" style="font-size: 0.85rem; color: var(--text-muted);">Academic Review Panel</span>
+      </div>
+      <button onclick="closeReviewSidebar()" style="background: transparent; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+    </div>
+
+    <div style="padding: 32px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 28px;">
+      <div>
+        <h4 class="badge-category" style="color: var(--text-muted);">Question Prompt</h4>
+        <p id="sideQuestionText" class="weight-semibold" style="font-size: 1.1rem; color: var(--dark-navy); line-height: 1.5; margin: 0;"></p>
+      </div>
+
+      <div>
+        <h4 class="badge-category" style="color: var(--text-muted);">Options</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div id="sideOptA" class="weight-regular" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95rem;"></div>
+          <div id="sideOptB" class="weight-regular" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95rem;"></div>
+          <div id="sideOptC" class="weight-regular" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95rem;"></div>
+          <div id="sideOptD" class="weight-regular" style="padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95rem;"></div>
+        </div>
+      </div>
+
+      <div id="sideExplanationWrapper" style="background: var(--blue-light); border-left: 4px solid var(--primary-blue); padding: 20px; border-radius: 12px;">
+        <h4 class="badge-category">Educational Rationale</h4>
+        <p id="sideExplanationText" class="weight-regular" style="font-size: 0.95rem; color: var(--dark-navy); line-height: 1.6; margin: 0;"></p>
+      </div>
+
+      <div style="background: var(--bg-light); border-left: 4px solid var(--dark-navy); padding: 20px; border-radius: 12px;">
+        <h4 class="badge-category" style="color: var(--dark-navy);">Your Notes</h4>
+        <p id="sideStudentNoteText" class="weight-regular" style="font-size: 0.95rem; color: var(--dark-navy); line-height: 1.6; font-style: italic; margin: 0;"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openReviewSidebar(questionText, optA, optB, optC, optD, correctLetter, explanationText, studentNoteText) {
+    document.getElementById("sideQuestionText").innerText = questionText;
+    document.getElementById("sideOptA").innerText = "A. " + optA;
+    document.getElementById("sideOptB").innerText = "B. " + optB;
+    document.getElementById("sideOptC").innerText = "C. " + optC;
+    document.getElementById("sideOptD").innerText = "D. " + optD;
+    document.getElementById("sideStudentNoteText").innerText = studentNoteText ? studentNoteText : "No written comments saved.";
+
+    const optNodes = {
+      'A': document.getElementById("sideOptA"),
+      'B': document.getElementById("sideOptB"),
+      'C': document.getElementById("sideOptC"),
+      'D': document.getElementById("sideOptD")
+    };
+
+    Object.keys(optNodes).forEach(key => {
+      optNodes[key].style.background = "var(--white)";
+      optNodes[key].style.borderColor = "var(--border-color)";
+      optNodes[key].style.color = "var(--dark-navy)";
+      optNodes[key].style.fontWeight = "400";
+    });
+
+    // Support both single (e.g., 'A') and multiple (e.g., 'A,B') correct answers, case-insensitive
+    const correctAnswers = correctLetter.split(',').map(s => s.trim().toUpperCase());
+    correctAnswers.forEach(ans => {
+      if (optNodes[ans]) {
+        optNodes[ans].style.background = "var(--green-bg)";
+        optNodes[ans].style.borderColor = "#10b981";
+        optNodes[ans].style.color = "#065f46";
+        optNodes[ans].style.fontWeight = "600";
+      }
+    });
+
+    if (explanationText && explanationText.trim() !== "") {
+      document.getElementById("sideExplanationText").innerText = explanationText;
+      document.getElementById("sideExplanationWrapper").style.display = "block";
+    } else {
+      document.getElementById("sideExplanationWrapper").style.display = "none";
+    }
+
+    document.getElementById("sidebarBackdrop").style.display = "block";
+    setTimeout(() => {
+      document.getElementById("reviewSidebar").style.right = "0px";
+    }, 10);
+  }
+
+  function closeReviewSidebar() {
+    document.getElementById("reviewSidebar").style.right = "-500px";
+    setTimeout(() => {
+      document.getElementById("sidebarBackdrop").style.display = "none";
+    }, 300);
+  }
+</script>
+{% endblock %}

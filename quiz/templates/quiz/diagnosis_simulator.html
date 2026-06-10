@@ -1,0 +1,696 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+
+  :root {
+    --primary-blue: #387CEE;
+    --dark-navy: #02013A;
+    --bg-light: #F8FAFC;
+    --white: #FFFFFF;
+    --text-main: var(--dark-navy);
+    --text-muted: rgba(2, 1, 58, 0.6);
+    --blue-light: rgba(56, 124, 238, 0.1);
+    --border-color: rgba(2, 1, 58, 0.1);
+    --font-family: 'PP Mori', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Functional Colors */
+    --green: #10b981;
+    --green-bg: #ecfdf5;
+    --red: #ef4444;
+    --red-bg: #fef2f2;
+    --amber-bg: #fffbeb;
+    --amber-border: #f59e0b;
+    --amber-text: #92400e;
+  }
+
+  .page-wrap {
+    font-family: var(--font-family);
+    color: var(--text-main);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .weight-extralight { font-weight: 200; }
+  .weight-regular { font-weight: 400; }
+  .weight-semibold { font-weight: 600; }
+
+  .card-custom {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(2, 1, 58, 0.05);
+  }
+
+  .btn-custom {
+    padding: 12px 32px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-primary-custom {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border: none;
+  }
+
+  .btn-primary-custom:hover {
+    opacity: 0.9;
+    color: var(--white);
+  }
+
+  .btn-outline-custom {
+    background-color: var(--white);
+    border-color: var(--border-color);
+    color: var(--dark-navy);
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--dark-navy);
+    transition: all 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    background: var(--white);
+  }
+
+  .badge-custom {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Hint Strips */
+  .hint-rectangular-strip {
+    padding: 18px 24px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+
+  .hint-locked-row {
+    background: var(--bg-light);
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+  }
+
+  .hint-unveiled-row {
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    color: var(--amber-text);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+    animation: rowShakeFlasher 0.4s ease-out;
+  }
+
+  @keyframes rowShakeFlasher {
+    0% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+  }
+
+  .autocomplete-item-row {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--dark-navy);
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .autocomplete-item-row:hover {
+    background: var(--blue-light);
+    color: var(--primary-blue);
+  }
+
+  /* Modal Styling */
+  .modal-container {
+    background: var(--white);
+    width: 100%;
+    max-width: 640px;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(2, 1, 58, 0.2);
+    overflow: hidden;
+    animation: modalPopAnimation 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalPopAnimation {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Directional Ribbon Styling */
+  .nav-ribbon-container {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     max-width: 500px;
+     margin: 0 auto 24px auto;
+  }
+
+  .nav-arrow-btn {
+     background: var(--dark-navy);
+     color: var(--white);
+     border: none;
+     border-radius: 8px;
+     padding: 10px 20px;
+     font-size: 0.95rem;
+     font-weight: 600;
+     cursor: pointer;
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     transition: all 0.2s ease;
+  }
+
+  .nav-arrow-btn:hover {
+     background: var(--primary-blue);
+     transform: translateY(-1px);
+  }
+
+  .nav-ribbon-title {
+     font-size: 1.4rem;
+     font-weight: 600;
+     color: var(--dark-navy);
+     margin: 0;
+     text-align: center;
+     border-bottom: 3px solid var(--primary-blue);
+     padding-bottom: 4px;
+  }
+</style>
+
+<div class="page-wrap">
+  
+  <div style="margin-bottom: 32px;">
+    <a href="{% url 'quiz:dashboard' %}" class="weight-semibold" style="color: var(--primary-blue); text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+      &larr; Return to Dashboard
+    </a>
+  </div>
+
+  <div id="diagnosisConfigPanel" class="card-custom" style="text-align: center;">
+    <div style="font-size: 4rem; margin-bottom: 24px;">🩺</div>
+    <h1 class="weight-semibold" style="font-size: 32px; color: var(--dark-navy); margin: 0 0 12px 0;">Clinical Diagnosis Simulator</h1>
+    <p class="weight-extralight" style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+      Select a medical track to begin. The simulator will load interactive case scenarios matching your specialization.
+    </p>
+
+    <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+      <div style="margin-bottom: 32px;">
+        <label class="form-label" for="diagSpecialtyFilter">Choose Clinical Field Track</label>
+        <select id="diagSpecialtyFilter" class="form-input weight-semibold">
+          <option value="ALL">-- All Medicine Fields Balanced Pool --</option>
+          <option value="Cardiologie">Cardiologie</option>
+          <option value="Neurologie">Neurologie</option>
+          <option value="Pneumologie">Pneumologie</option>
+          <option value="Gastro-entérologie">Gastro-entérologie</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn-custom btn-primary-custom" onclick="startClinicalSimulationWorkspace()" style="width: 100%; height: 56px;">
+        Launch Diagnostic Engine &rarr;
+      </button>
+    </div>
+  </div>
+
+  <div id="diagnosisWorkspacePanel" style="display: none;">
+    
+    <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center;">
+      <button type="button" onclick="returnToConfigurationPanel()" class="weight-semibold" style="background: transparent; border: none; color: var(--primary-blue); cursor: pointer; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; padding: 0;">
+        &larr; Change Filter
+      </button>
+      <div style="display: flex; gap: 12px;">
+         <span class="badge-custom weight-semibold" style="background: var(--bg-light); color: var(--text-muted);">
+           Solved: <span id="completedCountLabel" style="color: var(--dark-navy);">0</span>
+         </span>
+         <span class="badge-custom weight-semibold" style="background: var(--blue-light); color: var(--primary-blue);">
+           Stream: <span id="activeFilterLabel">ALL</span>
+         </span>
+      </div>
+    </div>
+
+    <div class="nav-ribbon-container">
+       <button type="button" id="prevNavBtn" class="nav-arrow-btn" onclick="navigateCaseSequence('prev')">
+          &larr; <span id="prevCaseIdLabel">#—</span>
+       </button>
+       <h2 class="nav-ribbon-title">What's the Diagnosis?</h2>
+       <button type="button" id="nextNavBtn" class="nav-arrow-btn" onclick="navigateCaseSequence('next')">
+          <span id="nextCaseIdLabel">#—</span> &rarr;
+       </button>
+    </div>
+
+    <div id="caseScenarioWorkspaceCard" class="card-custom" style="padding: 40px; margin-bottom: 40px;">
+       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <span id="caseBadgeCategory" class="badge-custom weight-semibold" style="background: var(--blue-light); color: var(--primary-blue);">General Medicine</span>
+          <span id="mistakeCounterLabel" class="weight-semibold" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Attempts: 0 / 6</span>
+       </div>
+       <h2 id="caseDisplayTitle" class="weight-semibold" style="font-size: 1.8rem; margin: 0 0 16px 0; color: var(--dark-navy);">Loading case...</h2>
+       <p id="caseDisplayDescription" class="weight-regular" style="font-size: 1.1rem; line-height: 1.7; color: var(--dark-navy); margin: 0; white-space: pre-wrap;"></p>
+    </div>
+
+    <div id="hintsContainerSection" style="margin-bottom: 40px;">
+       <h3 class="form-label" style="margin-bottom: 20px;">Progressive Case Hints</h3>
+       <div id="progressiveHintsBoxGrid" style="display: flex; flex-direction: column; gap: 16px;"></div>
+    </div>
+
+    <div id="inputSubmissionSection" class="card-custom" style="padding: 32px;">
+       <label class="form-label" for="diagnosticInputSubmission" style="color: var(--dark-navy);">Formulate Diagnosis Conclusion</label>
+       
+       <div style="display: flex; gap: 16px; position: relative; flex-wrap: wrap; align-items: flex-start;">
+          <div style="flex: 1; min-width: 300px; position: relative;">
+             <input type="text" id="diagnosticInputSubmission" class="form-input" placeholder="Start typing diagnosis term..." autocomplete="off" oninput="handleAutocompleteInputTyping(this)">
+             
+             <div id="inputBoxErrorMessage" class="weight-semibold" style="display: none; color: var(--red); font-size: 0.85rem; margin-top: 12px; align-items: center; gap: 8px;">
+                <span>❌</span> Incorrect guess. A new hint has been unboxed.
+             </div>
+
+             <div id="autocompleteDropdownResultsBox" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--white); border: 1px solid var(--border-color); border-radius: 0 0 16px 16px; box-shadow: 0 10px 30px rgba(2,1,58,0.1); z-index: 999; max-height: 240px; overflow-y: auto;"></div>
+          </div>
+
+          <button type="button" id="submitDiagnosisGuessBtn" class="btn-custom btn-primary-custom" style="height: 52px;" onclick="evaluateDiagnosticFormulationAttempt()">Verify Choice</button>
+          <button type="button" id="nextCaseScenarioBtn" class="btn-custom btn-primary-custom" style="display: none; height: 52px; background-color: var(--dark-navy);" onclick="handleNextCaseOrComplete()">Next Case &rarr;</button>
+       </div>
+    </div>
+  </div>
+
+  <div id="diagnosisCompletionPanel" class="card-custom" style="display: none; padding: 60px 40px; text-align: center;">
+     <div style="font-size: 5rem; margin-bottom: 32px;">🎓</div>
+     <h1 class="weight-semibold" style="font-size: 36px; color: var(--dark-navy); margin: 0 0 16px 0;">Simulation Complete</h1>
+     <p class="weight-extralight" style="color: var(--text-muted); font-size: 1.15rem; line-height: 1.6; max-width: 600px; margin: 0 auto 40px auto;">
+        Excellent work! You have successfully reviewed all available clinical cases for this module.
+     </p>
+
+     <div style="background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; max-width: 400px; margin: 0 auto 48px auto; padding: 32px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+        <span class="weight-semibold" style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Diagnostic Accuracy</span>
+        <span id="finalAccuracyPercent" class="weight-semibold" style="color: var(--primary-blue); font-size: 3.5rem;">0%</span>
+        <span class="weight-semibold" style="font-size: 0.9rem; color: var(--green);">Module Clear ✅</span>
+     </div>
+
+     <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <button type="button" class="btn-custom btn-primary-custom" onclick="returnToConfigurationPanel()">
+           Choose Another Track
+        </button>
+        <button type="button" class="btn-custom btn-outline-custom" onclick="restartSameCategoryStream()">
+           Restart Current Pool
+        </button>
+     </div>
+  </div>
+
+</div>
+
+<div id="treatmentModalBackdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 1, 58, 0.4); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+  <div class="modal-container">
+     <div style="background: var(--dark-navy); padding: 32px; color: var(--white); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+           <span style="font-size: 2rem;">📋</span>
+           <div>
+              <h3 class="weight-semibold" style="font-size: 1.4rem; margin: 0;">Management Guidelines</h3>
+              <p class="weight-regular" style="margin: 4px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.05em;">Clinical Protocol Profile</p>
+           </div>
+        </div>
+        <button type="button" onclick="closeTreatmentModalWindow()" style="background: transparent; border: none; color: var(--white); font-size: 2.5rem; cursor: pointer; line-height: 1;">&times;</button>
+     </div>
+     <div style="padding: 32px; max-height: 450px; overflow-y: auto;">
+        <div style="background: var(--green-bg); border-left: 4px solid var(--green); padding: 20px; border-radius: 12px; margin-bottom: 32px;">
+           <span class="weight-semibold" style="font-size: 0.8rem; color: var(--green); text-transform: uppercase; display: block; margin-bottom: 6px;">Target Diagnosis</span>
+           <p id="modalTargetDiagnosisTitle" class="weight-semibold" style="font-size: 1.3rem; margin: 0; color: var(--dark-navy);"></p>
+        </div>
+        <h4 class="form-label" style="color: var(--dark-navy);">Therapeutic Strategy</h4>
+        <p id="modalManagementStrategyText" class="weight-regular" style="font-size: 1.05rem; line-height: 1.7; color: var(--dark-navy); margin: 0; white-space: pre-wrap;"></p>
+     </div>
+     <div style="padding: 24px 32px; background: var(--bg-light); border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-custom btn-primary-custom" onclick="closeTreatmentModalWindow()">Close Framework</button>
+     </div>
+  </div>
+</div>
+
+<script>
+  let activeCaseObject = null;
+  let loggedMistakesCounter = 0;
+  let totalCasesSolvedCounter = 0;
+  let firstAttemptSolvedCounter = 0;
+  let medicalTermsDictionary = [];
+  let cdnDebounceTimer;
+
+  document.addEventListener("DOMContentLoaded", () => {
+      loadMedicalTermsDictionaryLibrary();
+      document.addEventListener("click", (e) => {
+         if (e.target.id !== "diagnosticInputSubmission") {
+            document.getElementById("autocompleteDropdownResultsBox").style.display = "none";
+         }
+      });
+  });
+
+  function loadMedicalTermsDictionaryLibrary() {
+     fetch("{% url 'quiz:medical_terms_api' %}")
+       .then(res => res.json())
+       .then(data => {
+          if (data.status === "success") {
+             medicalTermsDictionary = data.terms;
+          }
+       })
+       .catch(err => console.error("Library load failed", err));
+  }
+
+  function startClinicalSimulationWorkspace() {
+     const selectedFilter = document.getElementById("diagSpecialtyFilter").value;
+     document.getElementById("activeFilterLabel").innerText = selectedFilter;
+     totalCasesSolvedCounter = 0;
+     firstAttemptSolvedCounter = 0;
+     document.getElementById("completedCountLabel").innerText = "0";
+     document.getElementById("diagnosisConfigPanel").style.display = "none";
+     document.getElementById("diagnosisCompletionPanel").style.display = "none";
+     document.getElementById("diagnosisWorkspacePanel").style.display = "block";
+     
+     // Load the first case cleanly without directional params
+     loadNewClinicalCaseScenario();
+  }
+
+  function returnToConfigurationPanel() {
+     document.getElementById("diagnosisWorkspacePanel").style.display = "none";
+     document.getElementById("diagnosisCompletionPanel").style.display = "none";
+     document.getElementById("diagnosisConfigPanel").style.display = "block";
+  }
+
+  function restartSameCategoryStream() {
+     startClinicalSimulationWorkspace();
+  }
+
+  function triggerCompletionScreenState() {
+     document.getElementById("diagnosisWorkspacePanel").style.display = "none";
+     const pct = totalCasesSolvedCounter > 0 ? Math.round((firstAttemptSolvedCounter / totalCasesSolvedCounter) * 100) : 0;
+     document.getElementById("finalAccuracyPercent").innerText = pct + "%";
+     document.getElementById("diagnosisCompletionPanel").style.display = "block";
+  }
+
+  // Gateway wrapper function specifically handling arrow pagination instructions
+  function navigateCaseSequence(directionString) {
+     let currentId = activeCaseObject ? activeCaseObject.id : "";
+     loadNewClinicalCaseScenario(currentId, directionString);
+  }
+
+  function loadNewClinicalCaseScenario(currentId = "", direction = "") {
+     const selectedCategory = document.getElementById("activeFilterLabel").innerText.trim();
+     loggedMistakesCounter = 0;
+     document.getElementById("mistakeCounterLabel").innerText = `Attempts: 0 / 6`;
+     resetInputValidationFeedbackUI();
+     document.getElementById("diagnosticInputSubmission").value = "";
+     document.getElementById("diagnosticInputSubmission").disabled = false;
+     document.getElementById("submitDiagnosisGuessBtn").style.display = "inline-flex";
+     document.getElementById("nextCaseScenarioBtn").style.display = "none";
+
+     let apiUrl = `{% url 'quiz:fetch_diagnosis_case' %}?category=${selectedCategory}`;
+     if (currentId && direction) {
+        apiUrl += `&current_id=${currentId}&direction=${direction}`;
+     }
+
+     fetch(apiUrl)
+       .then(res => res.json())
+       .then(data => {
+          if (!data || data.status === "error" || data.status === "empty" || !data.id) {
+             triggerCompletionScreenState();
+             return;
+          }
+          
+          activeCaseObject = data;
+          
+          // Nav arrow labels — show #-- when no adjacent case exists
+          document.getElementById("prevCaseIdLabel").innerText = data.has_prev ? `#${data.id - 1}` : '#—';
+          document.getElementById("nextCaseIdLabel").innerText = data.has_next ? `#${data.id + 1}` : '#—';
+
+          // Grey out nav buttons when no adjacent case exists
+          const prevBtn = document.getElementById("prevNavBtn");
+          const nextBtn = document.getElementById("nextNavBtn");
+          if (prevBtn) {
+            prevBtn.style.opacity = data.has_prev ? "1" : "0.35";
+            prevBtn.style.pointerEvents = data.has_prev ? "auto" : "none";
+          }
+          if (nextBtn) {
+            nextBtn.style.opacity = data.has_next ? "1" : "0.35";
+            nextBtn.style.pointerEvents = data.has_next ? "auto" : "none";
+          }
+          
+          document.getElementById("caseBadgeCategory").innerText = data.category || "General Medicine";
+          document.getElementById("caseDisplayTitle").innerText = data.title;
+          document.getElementById("caseDisplayDescription").innerText = data.description;
+          buildProgressiveHintsContainerGrid(data.hints);
+
+          // Restore saved progress state (Prev/Next resume logic)
+          if (data.progress) {
+             restoreCaseProgressState(data.progress);
+          }
+       })
+       .catch(err => triggerCompletionScreenState());
+  }
+
+  function handleNextCaseOrComplete() {
+     // If there is no next case, go directly to the completion screen
+     if (activeCaseObject && !activeCaseObject.has_next) {
+        triggerCompletionScreenState();
+        return;
+     }
+     navigateCaseSequence('next');
+  }
+
+  function buildProgressiveHintsContainerGrid(hintsArray) {
+     const container = document.getElementById("progressiveHintsBoxGrid");
+     container.innerHTML = "";
+     hintsArray.forEach((hint, index) => {
+        const strip = document.createElement("div");
+        strip.id = `clueBoxStripIndex_${index}`;
+        strip.className = "hint-rectangular-strip hint-locked-row weight-semibold";
+        strip.innerHTML = `
+           <span style="font-size: 1.2rem; line-height: 1;">🔒</span>
+           <div>Hint #${index + 1} Locked</div>
+        `;
+        container.appendChild(strip);
+     });
+  }
+
+  function restoreCaseProgressState(progressData) {
+     // Restore hint strips that were already unlocked in a previous session
+     const unlockedCount = progressData.hints_unlocked_count || 0;
+     for (let i = 0; i < unlockedCount; i++) {
+        unveilSingleSpecificHintBoxRow(i);
+     }
+
+     if (progressData.is_solved) {
+        // Case was already solved — show green strips and lock input
+        unveilAllRemainingDiagnosticHintStrips();
+        document.getElementById("diagnosticInputSubmission").disabled = true;
+        document.getElementById("submitDiagnosisGuessBtn").style.display = "none";
+        document.getElementById("nextCaseScenarioBtn").style.display = "inline-flex";
+        loggedMistakesCounter = progressData.attempts_count || 0;
+     } else if (progressData.attempts_count >= 6) {
+        // Exhausted — input locked, show next button
+        document.getElementById("diagnosticInputSubmission").disabled = true;
+        document.getElementById("submitDiagnosisGuessBtn").style.display = "none";
+        document.getElementById("nextCaseScenarioBtn").style.display = "inline-flex";
+        loggedMistakesCounter = 6;
+     } else {
+        loggedMistakesCounter = progressData.attempts_count || 0;
+     }
+     document.getElementById("mistakeCounterLabel").innerText = `Attempts: ${loggedMistakesCounter} / 6`;
+  }
+
+  function handleAutocompleteInputTyping(inputElement) {
+     resetInputValidationFeedbackUI();
+     const textValue = inputElement.value.trim();
+     const resultsBox = document.getElementById("autocompleteDropdownResultsBox");
+     clearTimeout(cdnDebounceTimer);
+     if (!textValue || textValue.length < 2) {
+        resultsBox.style.display = "none";
+        return;
+     }
+     cdnDebounceTimer = setTimeout(() => {
+        const nlmApiUrl = `https://clinicaltables.nlm.nih.gov/api/conditions/v3/search?terms=${encodeURIComponent(textValue)}&maxList=6`;
+        fetch(nlmApiUrl)
+          .then(res => res.json())
+          .then(data => {
+             let cdnTerms = (data && data[3]) ? data[3].map(item => item[0]) : [];
+             let localMatches = medicalTermsDictionary.filter(term => term.toLowerCase().includes(textValue.toLowerCase()));
+             let combinedResults = [...new Set([...localMatches, ...cdnTerms])];
+             if (combinedResults.length === 0) {
+                resultsBox.style.display = "none";
+                return;
+             }
+             resultsBox.innerHTML = "";
+             combinedResults.slice(0, 6).forEach(matchTerm => {
+                const row = document.createElement("div");
+                row.className = "autocomplete-item-row";
+                row.innerText = matchTerm;
+                row.onclick = () => {
+                   inputElement.value = matchTerm;
+                   resultsBox.style.display = "none";
+                   resetInputValidationFeedbackUI();
+                };
+                resultsBox.appendChild(row);
+             });
+             resultsBox.style.display = "block";
+          })
+          .catch(err => {
+             let fallbackMatches = medicalTermsDictionary.filter(term => term.toLowerCase().includes(textValue.toLowerCase()));
+             if (fallbackMatches.length > 0) {
+                resultsBox.innerHTML = "";
+                fallbackMatches.slice(0, 6).forEach(term => {
+                   const row = document.createElement("div");
+                   row.className = "autocomplete-item-row";
+                   row.innerText = term;
+                   row.onclick = () => {
+                      inputElement.value = term;
+                      resultsBox.style.display = "none";
+                      resetInputValidationFeedbackUI();
+                   };
+                   resultsBox.appendChild(row);
+                });
+                resultsBox.style.display = "block";
+             }
+          });
+     }, 250);
+  }
+
+  function saveDiagnosisProgress(isSolved) {
+     if (!activeCaseObject) return;
+     fetch("{% url 'quiz:save_diagnosis_progress' %}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+        body: JSON.stringify({
+           case_id: activeCaseObject.id,
+           hints_unlocked_count: loggedMistakesCounter,
+           is_solved: isSolved,
+           attempts_count: loggedMistakesCounter,
+        })
+     }).catch(err => console.error("Progress save failed", err));
+  }
+
+  function evaluateDiagnosticFormulationAttempt() {
+     const inputField = document.getElementById("diagnosticInputSubmission");
+     const studentGuess = inputField.value.trim().toLowerCase();
+     if(!studentGuess) {
+        alert("Please enter a diagnostic term.");
+        return;
+     }
+     const targetTruthAnswer = activeCaseObject.answer.trim().toLowerCase();
+     if (studentGuess === targetTruthAnswer) {
+        resetInputValidationFeedbackUI();
+        inputField.style.borderColor = "var(--green)";
+        unveilAllRemainingDiagnosticHintStrips();
+        openTreatmentModalWindow();
+        totalCasesSolvedCounter++;
+        if (loggedMistakesCounter === 0) firstAttemptSolvedCounter++;
+        document.getElementById("completedCountLabel").innerText = totalCasesSolvedCounter;
+        inputField.disabled = true;
+        document.getElementById("submitDiagnosisGuessBtn").style.display = "none";
+        document.getElementById("nextCaseScenarioBtn").style.display = "inline-flex";
+        saveDiagnosisProgress(true);
+     } else {
+        inputField.style.borderColor = "var(--red)"; 
+        inputField.style.background = "var(--red-bg)";
+        document.getElementById("inputBoxErrorMessage").style.display = "flex";
+        if (loggedMistakesCounter < 6) {
+           unveilSingleSpecificHintBoxRow(loggedMistakesCounter);
+           loggedMistakesCounter++;
+           document.getElementById("mistakeCounterLabel").innerText = `Attempts: ${loggedMistakesCounter} / 6`;
+           saveDiagnosisProgress(false);
+        }
+        if (loggedMistakesCounter === 6) {
+           openTreatmentModalWindow();
+           totalCasesSolvedCounter++; 
+           document.getElementById("completedCountLabel").innerText = totalCasesSolvedCounter;
+           inputField.disabled = true;
+           document.getElementById("submitDiagnosisGuessBtn").style.display = "none";
+           document.getElementById("nextCaseScenarioBtn").style.display = "inline-flex";
+        }
+     }
+  }
+
+  function resetInputValidationFeedbackUI() {
+     const inputField = document.getElementById("diagnosticInputSubmission");
+     if (inputField) {
+        inputField.style.borderColor = "var(--border-color)";
+        inputField.style.background = "var(--bg-light)";
+     }
+     const errMsg = document.getElementById("inputBoxErrorMessage");
+     if (errMsg) errMsg.style.display = "none";
+  }
+
+  function unveilSingleSpecificHintBoxRow(index) {
+     const stripNode = document.getElementById(`clueBoxStripIndex_${index}`);
+     if (stripNode && activeCaseObject) {
+        const hint = activeCaseObject.hints[index];
+        const hintText = hint ? (hint.text || 'Indicator unboxed.') : 'Indicator unboxed.';
+        stripNode.className = "hint-rectangular-strip hint-unveiled-row weight-semibold";
+        stripNode.innerHTML = `
+           <span style="font-size: 1.2rem; line-height: 1;">💡</span>
+           <div>${hintText}</div>
+        `;
+     }
+  }
+
+  function unveilAllRemainingDiagnosticHintStrips() {
+     for(let i = 0; i < activeCaseObject.hints.length; i++) {
+        const stripNode = document.getElementById(`clueBoxStripIndex_${i}`);
+        if(stripNode) {
+           const hint = activeCaseObject.hints[i];
+           const hintText = hint ? (hint.text || 'Diagnostic match.') : 'Diagnostic match.';
+           stripNode.className = "hint-rectangular-strip weight-semibold";
+           stripNode.style.background = "var(--green-bg)";
+           stripNode.style.borderColor = "var(--green)";
+           stripNode.style.color = "var(--green)";
+           stripNode.innerHTML = `
+              <span style="font-size: 1.2rem; line-height: 1;">✅</span>
+              <div>${hintText}</div>
+           `;
+        }
+     }
+  }
+
+  function openTreatmentModalWindow() {
+     document.getElementById("modalTargetDiagnosisTitle").innerText = activeCaseObject.answer;
+     document.getElementById("modalManagementStrategyText").innerText = activeCaseObject.management || 'No treatment protocol found.';
+     document.getElementById("treatmentModalBackdrop").style.display = "flex";
+  }
+
+  function closeTreatmentModalWindow() {
+     document.getElementById("treatmentModalBackdrop").style.display = "none";
+  }
+</script>
+{% endblock %}

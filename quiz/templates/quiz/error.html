@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Profile Setup Required — MedQuiz{% endblock %}
+
+{% block content %}
+<div style="min-height: calc(100vh - 66px); background: var(--gray-light); display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+  <div style="width: 100%; max-width: 500px; background: var(--white); border-radius: var(--r-lg); box-shadow: var(--shadow-card); overflow: hidden; border-top: 4px solid var(--amber-border);">
+    
+    <div style="padding: 36px; text-align: center;">
+      <div style="width: 56px; height: 56px; background: var(--amber-bg); border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; color: var(--amber-text); font-size: 24px; margin-bottom: 20px;">
+        ⚠️
+      </div>
+      
+      <h1 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; color: var(--text);">Student Profile Required</h1>
+      
+      <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;">
+        {{ message|default:"Your user account is authenticated, but it does not have a Student Profile containing assigned University and Curriculum Year access parameters." }}
+      </p>
+
+      <div style="background: var(--gray-light); padding: 16px; border-radius: var(--r-md); text-align: left; font-size: 0.84rem; color: var(--text-muted); margin-bottom: 28px;">
+        <strong style="color: var(--text); display: block; margin-bottom: 4px;">Why am I seeing this?</strong>
+        Administrators and superusers must be linked explicitly to a specific track inside the Django Admin dashboard to look at the student-side portal features.
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a href="/admin/quiz/studentprofile/add/" class="btn btn-primary" style="width: 100%; padding: 12px;">
+          Assign Student Profile via Admin
+        </a>
+        <a href="{% url 'quiz:logout' %}" class="btn" style="width: 100%; padding: 12px; border: 1.5px solid var(--gray-mid); color: var(--text-muted); background: var(--white);" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+          Log Out Account
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<form id="logout-form" action="{% url 'quiz:logout' %}" method="post" style="display: none;">
+  {% csrf_token %}
+</form>
+{% endblock %}

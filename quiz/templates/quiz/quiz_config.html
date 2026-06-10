@@ -1,0 +1,698 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+
+  :root {
+    --primary-blue: #387CEE;
+    --dark-navy: #02013A;
+    --bg-light: #F8FAFC;
+    --white: #FFFFFF;
+    --text-main: var(--dark-navy);
+    --text-muted: rgba(2, 1, 58, 0.6);
+    --blue-light: rgba(56, 124, 238, 0.1);
+    --border-color: rgba(2, 1, 58, 0.1);
+    --font-family: 'PP Mori', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Functional Colors */
+    --green: #10b981;
+    --green-bg: #ecfdf5;
+    --red: #ef4444;
+    --red-bg: #fef2f2;
+    --amber-bg: #fffbeb;
+    --amber-border: #f59e0b;
+    --amber-text: #92400e;
+  }
+
+  .page-wrap {
+    font-family: var(--font-family);
+    color: var(--text-main);
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .weight-extralight { font-weight: 200; }
+  .weight-regular { font-weight: 400; }
+  .weight-semibold { font-weight: 600; }
+
+  .card-custom {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(2, 1, 58, 0.05);
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--dark-navy);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--dark-navy);
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+  }
+
+  .btn-custom {
+    padding: 12px 28px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-primary-custom {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border: none;
+  }
+
+  .btn-primary-custom:hover {
+    opacity: 0.9;
+    color: var(--white);
+  }
+
+  .btn-outline-custom {
+    background-color: var(--white);
+    border-color: var(--border-color);
+    color: var(--dark-navy);
+  }
+
+  .btn-outline-custom.active {
+    background-color: var(--dark-navy);
+    color: var(--white);
+    border-color: var(--dark-navy);
+  }
+
+  /* Slider Styling */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+  }
+
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: var(--border-color);
+    border-radius: 3px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--primary-blue);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -7px;
+    box-shadow: 0 2px 6px rgba(56, 124, 238, 0.3);
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-light);
+    border-radius: 0;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--primary-blue);
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Quiz Option Styling */
+  .quiz-option-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    padding: 18px;
+    border: 1.5px solid var(--border-color);
+    background: var(--white);
+    border-radius: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .quiz-option-card:hover {
+    border-color: var(--primary-blue);
+    background: var(--bg-light);
+  }
+</style>
+
+<div class="page-wrap">
+  
+  <div id="configContainer">
+    <h1 class="weight-semibold" style="font-size: 36px; margin-bottom: 8px; color: var(--dark-navy);">Exam Configuration</h1>
+    <p class="weight-extralight" style="font-size: 18px; color: var(--text-muted); margin-bottom: 32px;">
+      Institutional Track: <span class="weight-regular" style="color: var(--dark-navy);">{{ university.name }} — {{ academic_year.name }}</span>
+    </p>
+
+    <div style="background: var(--blue-light); border-left: 4px solid var(--primary-blue); color: var(--dark-navy); padding: 20px; border-radius: 12px; font-size: 0.95rem; line-height: 1.6; margin-bottom: 40px; display: flex; gap: 16px; align-items: flex-start;">
+      <span style="font-size: 1.5rem; line-height: 1;">ℹ️</span>
+      <div class="weight-regular">
+        <strong class="weight-semibold">Instructions:</strong> Select your parameters sequentially. For items featuring multiple correct answers, select all components you believe to be true before hitting 'Submit Verification'.
+      </div>
+    </div>
+
+    <div class="card-custom" style="display: flex; flex-direction: column; gap: 28px; margin-bottom: 40px;">
+      
+      <div class="form-group">
+        <label class="form-label">Material Language Track</label>
+        <div style="display: flex; gap: 12px; margin-top: 8px;">
+          <button type="button" id="btnLangEN" class="btn-custom btn-outline-custom active" onclick="setLanguage('EN')">English Track</button>
+          <button type="button" id="btnLangFR" class="btn-custom btn-outline-custom" onclick="setLanguage('FR')">French Track</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="courseSelect">1. Choose Course Track</label>
+        <select id="courseSelect" class="form-input" onchange="handleCourseSelectionChange()">
+          <option value="">-- Select an Active Course --</option>
+          {% for crs in courses %}
+            <option value="{{ crs.id }}">{{ crs.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group" id="moduleFilterWrapper" style="display: none;">
+        <label class="form-label" for="moduleSelect">2. Choose Module Focus Area</label>
+        <select id="moduleSelect" class="form-input" onchange="handleModuleSelectionChange()">
+          <option value="">-- Select a Module --</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="lectureFilterWrapper" style="display: none;">
+        <label class="form-label" for="lectureSelect">3. Choose Lecture Filter Range</label>
+        <select id="lectureSelect" class="form-input" onchange="handleLectureSelectionChange()">
+          <option value="">-- Select a Lecture --</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="sliderFilterWrapper" style="display: none; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <label class="form-label" for="questionVolumeSlider" style="margin: 0;">4. Assessment Length</label>
+          <span id="sliderValueDisplay" class="weight-semibold" style="background: var(--blue-light); color: var(--primary-blue); padding: 6px 16px; border-radius: 8px; font-size: 0.9rem; min-width: 120px; text-align: center;">20 Questions</span>
+        </div>
+        <div style="position: relative; padding: 10px 0;">
+          <input type="range" id="questionVolumeSlider" min="20" max="60" step="5" value="20" oninput="updateSliderDisplayLabel()">
+          <div id="sliderTickRow" style="position: relative; height: 24px; margin-top: 8px;">
+            <!-- Ticks injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div id="actionBarWrapper" style="display: none; background: var(--bg-light); border-radius: 16px; padding: 24px; align-items: center; justify-content: space-between; margin-top: 10px; border: 1px solid var(--border-color);">
+        <div>
+          <h4 class="weight-semibold" style="font-size: 1rem; margin: 0 0 4px 0;">Matching Pool</h4>
+          <p class="weight-regular" style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"><span id="poolCountText" class="weight-semibold" style="color: var(--dark-navy);">0</span> questions remaining</p>
+          <p id="poolResumeNote" style="display:none; font-size: 0.82rem; color: var(--green); margin: 6px 0 0 0; font-weight: 600;"></p>
+        </div>
+        <button id="startBtn" class="btn-custom btn-primary-custom" onclick="initiateExamProcess()">Launch Examination</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Interface -->
+  <div id="quizWorkspace" style="display: none; background: var(--white); border: 1px solid var(--border-color); border-radius: 24px; box-shadow: 0 10px 40px rgba(2,1,58,0.08); overflow: hidden; position: relative;">
+    
+    <div class="progress-bar-container">
+      <div id="blueProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+    </div>
+
+    <div style="padding: 40px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border-color); gap: 20px;">
+        <div>
+          <span id="questionProgressText" class="weight-semibold" style="color: var(--primary-blue); font-size: 1.15rem; display: block; margin-bottom: 6px;">Question X of Y</span>
+          <span id="scoreTracker" class="weight-regular" style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Current Score: <span id="matchesAccumulatorText" class="weight-semibold" style="color: var(--dark-navy);">0</span></span>
+        </div>
+        
+        <button type="button" class="btn-custom btn-outline-custom" onclick="toggleNoteWorkspace()" style="padding: 8px 20px; font-size: 0.85rem;">
+          <span>📝</span> Add Note
+        </button>
+      </div>
+
+      <div id="noteWidgetArea" style="display: none; background: var(--bg-light); border: 1px solid var(--border-color); padding: 24px; border-radius: 16px; margin-bottom: 32px;">
+        <label class="form-label" style="margin-bottom: 12px;">Personal Study Notes</label>
+        <textarea id="questionNoteContent" class="form-input" rows="3" placeholder="Record insights or mnemonics..." style="margin-bottom: 16px; background: var(--white);"></textarea>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn-custom btn-outline-custom" onclick="toggleNoteWorkspace()" style="font-size: 0.85rem; padding: 8px 20px;">Cancel</button>
+          <button type="button" class="btn-custom btn-primary-custom" onclick="commitQuestionNoteAction()" style="font-size: 0.85rem; padding: 8px 24px;">Save Bookmark</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 32px;">
+        <span id="questionTypeBadge" class="weight-semibold" style="display:inline-block; margin-bottom: 12px; background: var(--blue-light); color: var(--primary-blue); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Multiple Choice</span>
+        <h3 id="questionWording" class="weight-semibold" style="font-size: 1.4rem; line-height: 1.5; color: var(--dark-navy); margin: 0;"></h3>
+      </div>
+      
+      <div id="optionsGroup" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px;"></div>
+
+      <div id="rationalBox" style="display: none; background: var(--blue-light); border-left: 4px solid var(--primary-blue); color: var(--dark-navy); padding: 24px; border-radius: 16px; font-size: 1rem; line-height: 1.6; margin-bottom: 24px;"></div>
+
+      <div id="liveSavedNoteDisplayBox" style="display: none; background: var(--bg-light); border-left: 4px solid var(--dark-navy); color: var(--dark-navy); padding: 20px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; margin-bottom: 32px; font-style: italic;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px;">
+        <button id="submitVerifyBtn" class="btn-custom btn-primary-custom" style="padding: 14px 40px;" onclick="verifySubmittedCheckboxes()">Submit Verification</button>
+        <button id="nextBtn" class="btn-custom btn-primary-custom" style="display: none; padding: 14px 40px; background-color: var(--dark-navy);" onclick="advanceItem()">Next Question →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentLanguage = "EN";
+  let activeQuestionsSet = [];
+  let indexPointer = 0;
+  let matchesAccumulator = 0;
+  let currentSavedNoteText = "";
+
+  function setLanguage(langCode) {
+    if (currentLanguage === langCode) return;
+    currentLanguage = langCode;
+    
+    const btnEN = document.getElementById("btnLangEN");
+    const btnFR = document.getElementById("btnLangFR");
+    
+    if (langCode === 'EN') {
+      btnEN.classList.add('active');
+      btnFR.classList.remove('active');
+    } else {
+      btnFR.classList.add('active');
+      btnEN.classList.remove('active');
+    }
+
+    const courseId = document.getElementById("courseSelect").value;
+    if (courseId) {
+      handleCourseSelectionChange();
+    } else {
+      resetModuleFilterState();
+      resetLectureFilterState();
+    }
+  }
+
+  function updateSliderDisplayLabel() {
+    const slider = document.getElementById("questionVolumeSlider");
+    const sliderVal = parseInt(slider.value);
+    document.getElementById("sliderValueDisplay").innerText = `${sliderVal} Questions`;
+    renderSliderTicks();
+  }
+
+  function renderSliderTicks() {
+    const slider = document.getElementById("questionVolumeSlider");
+    const tickRow = document.getElementById("sliderTickRow");
+    const min = parseInt(slider.min);
+    const max = parseInt(slider.max);
+    const current = parseInt(slider.value);
+    const ticks = [20, 30, 40, 50, 60];
+
+    const trackW = slider.offsetWidth || slider.getBoundingClientRect().width;
+    const thumbR = 10; 
+
+    tickRow.innerHTML = ticks.map(t => {
+      const ratio = (t - min) / (max - min);
+      const px = thumbR + ratio * (trackW - 2 * thumbR);
+      const isActive = t === current;
+      const label = t === min ? 'Min: 20' : t === max ? 'Max: 60' : String(t);
+      return `<span style="
+        position: absolute;
+        left: ${px}px;
+        transform: translateX(-50%);
+        color: ${isActive ? 'var(--primary-blue)' : 'var(--text-muted)'};
+        font-size: 0.75rem;
+        font-weight: ${isActive ? '600' : '400'};
+        white-space: nowrap;
+      ">${label}</span>`;
+    }).join('');
+  }
+
+  function handleCourseSelectionChange() {
+    const courseId = document.getElementById("courseSelect").value;
+    if (!courseId) {
+      resetModuleFilterState();
+      resetLectureFilterState();
+      return;
+    }
+
+    fetch(`{% url 'quiz:api_filters' %}?course=${courseId}&lang=${currentLanguage}`)
+      .then(res => res.json())
+      .then(data => {
+        const modSelect = document.getElementById("moduleSelect");
+        const prevModuleId = modSelect.value;
+        modSelect.innerHTML = '<option value="">-- Select a Module --</option>';
+        data.modules.forEach(m => {
+          modSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+        });
+        document.getElementById("moduleFilterWrapper").style.display = "block";
+        if (prevModuleId) {
+          modSelect.value = prevModuleId;
+          if (modSelect.value) {
+            handleModuleSelectionChange();
+            return;
+          }
+        }
+        resetLectureFilterState();
+      });
+  }
+
+  function handleModuleSelectionChange() {
+    const moduleId = document.getElementById("moduleSelect").value;
+    if (!moduleId) {
+      resetLectureFilterState();
+      return;
+    }
+
+    fetch(`{% url 'quiz:api_filters' %}?module=${moduleId}&lang=${currentLanguage}`)
+      .then(res => res.json())
+      .then(data => {
+        const lecSelect = document.getElementById("lectureSelect");
+        const prevLecture = lecSelect.value;
+        lecSelect.innerHTML = '<option value="">-- Select a Lecture --</option>';
+        data.lectures.forEach(l => {
+          lecSelect.innerHTML += `<option value="${l}">${l}</option>`;
+        });
+        document.getElementById("lectureFilterWrapper").style.display = "block";
+        if (prevLecture) {
+          lecSelect.value = prevLecture;
+          if (lecSelect.value) {
+            handleLectureSelectionChange();
+            return;
+          }
+        }
+        document.getElementById("sliderFilterWrapper").style.display = "none";
+        document.getElementById("actionBarWrapper").style.display = "none";
+      });
+  }
+
+  function handleLectureSelectionChange() {
+    const lectureValue = document.getElementById("lectureSelect").value;
+    const courseId = document.getElementById("courseSelect").value;
+    const moduleId = document.getElementById("moduleSelect").value;
+
+    if (!courseId || !moduleId || !lectureValue) {
+      document.getElementById("sliderFilterWrapper").style.display = "none";
+      document.getElementById("actionBarWrapper").style.display = "none";
+      return;
+    }
+
+    let checkUrl = `{% url 'quiz:exam_engine_api' %}?lang=${currentLanguage}&course=${courseId}&module=${moduleId}&lecture=${encodeURIComponent(lectureValue)}`;
+    
+    fetch(checkUrl)
+      .then(res => res.json())
+      .then(payload => {
+         if(payload.status === "success") {
+            const remaining = payload.questions.length;
+            const poolText = document.getElementById("poolCountText");
+            const poolNote = document.getElementById("poolResumeNote");
+            poolText.innerText = remaining;
+            // Show a resume note if questions were already answered (pool was filtered)
+            if (poolNote) {
+              poolNote.style.display = remaining === 0 ? "block" : "none";
+              poolNote.innerText = remaining === 0
+                ? "✅ You have completed all questions in this selection."
+                : "";
+            }
+            document.getElementById("sliderFilterWrapper").style.display = "block";
+            document.getElementById("actionBarWrapper").style.display = "flex";
+            document.getElementById("startBtn").disabled = (remaining === 0);
+            requestAnimationFrame(renderSliderTicks);
+         }
+      });
+  }
+
+  function resetModuleFilterState() {
+    document.getElementById("moduleFilterWrapper").style.display = "none";
+    document.getElementById("moduleSelect").innerHTML = '<option value="">-- Select a Module --</option>';
+  }
+
+  function resetLectureFilterState() {
+    document.getElementById("lectureFilterWrapper").style.display = "none";
+    document.getElementById("sliderFilterWrapper").style.display = "none";
+    document.getElementById("actionBarWrapper").style.display = "none";
+    document.getElementById("lectureSelect").innerHTML = '<option value="">-- Select a Lecture --</option>';
+  }
+
+  function initiateExamProcess() {
+    const crsId = document.getElementById("courseSelect").value;
+    const modId = document.getElementById("moduleSelect").value;
+    const lectureTitle = document.getElementById("lectureSelect").value;
+    const sizeLimit = document.getElementById("questionVolumeSlider").value;
+
+    let targetUrl = `{% url 'quiz:exam_engine_api' %}?lang=${currentLanguage}&course=${crsId}&module=${modId}&lecture=${encodeURIComponent(lectureTitle)}&limit=${sizeLimit}`;
+
+    fetch(targetUrl)
+      .then(res => res.json())
+      .then(payload => {
+        if(payload.status === "success" && payload.questions.length > 0) {
+          activeQuestionsSet = payload.questions;
+          indexPointer = 0;
+          matchesAccumulator = 0;
+          document.getElementById("matchesAccumulatorText").innerText = "0";
+          
+          document.getElementById("configContainer").style.display = "none";
+          document.getElementById("quizWorkspace").style.display = "block";
+          renderActiveQuestion();
+        }
+      });
+  }
+
+  function renderActiveQuestion() {
+    document.getElementById("rationalBox").style.display = "none";
+    document.getElementById("liveSavedNoteDisplayBox").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("submitVerifyBtn").style.display = "inline-flex";
+    document.getElementById("submitVerifyBtn").disabled = false;
+    document.getElementById("noteWidgetArea").style.display = "none";
+    document.getElementById("questionNoteContent").value = "";
+    currentSavedNoteText = "";
+    
+    const q = activeQuestionsSet[indexPointer];
+    const totalItems = activeQuestionsSet.length;
+    
+    const currentPercent = Math.round((indexPointer / totalItems) * 100);
+    document.getElementById("blueProgressBar").style.width = `${currentPercent}%`;
+
+    document.getElementById("questionProgressText").innerText = `Question ${indexPointer + 1} of ${totalItems}`;
+    document.getElementById("questionWording").innerText = q.text;
+
+    const typeBadge = document.getElementById("questionTypeBadge");
+    if(q.correct_list.length > 1) {
+       typeBadge.innerText = "Multiple Correct Options (Select All That Apply)";
+       typeBadge.style.background = "var(--blue-light)";
+       typeBadge.style.color = "var(--primary-blue)";
+    } else {
+       typeBadge.innerText = "Single Best Answer Option";
+       typeBadge.style.background = "var(--bg-light)";
+       typeBadge.style.color = "var(--text-muted)";
+    }
+
+    const box = document.getElementById("optionsGroup");
+    box.innerHTML = "";
+
+    q.options.forEach((opt, idx) => {
+      if(!opt) return;
+      
+      const card = document.createElement("label");
+      card.className = "quiz-option-card";
+      
+      card.innerHTML = `
+         <input type="checkbox" value="${idx}" class="quiz-option-checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-blue); cursor: pointer;">
+         <span class="weight-regular">${String.fromCharCode(97 + idx)}. ${opt}</span>
+      `;
+      box.appendChild(card);
+    });
+  }
+
+  function verifySubmittedCheckboxes() {
+    const q = activeQuestionsSet[indexPointer];
+    const checkboxNodes = document.querySelectorAll(".quiz-option-checkbox");
+    
+    let userSelections = [];
+    checkboxNodes.forEach(box => {
+       if(box.checked) {
+          userSelections.push(parseInt(box.value));
+       }
+    });
+
+    if (userSelections.length === 0) {
+       alert("Please select at least one option before submitting verification answers.");
+       return;
+    }
+
+    document.getElementById("submitVerifyBtn").style.display = "none";
+    checkboxNodes.forEach(chk => chk.disabled = true);
+
+    const correctAnswers = q.correct_list;
+    userSelections.sort();
+    correctAnswers.sort();
+
+    const listsMatchExactly = (userSelections.length === correctAnswers.length) && 
+                              userSelections.every((val, index) => val === correctAnswers[index]);
+
+    // Partial match: user got some but not all correct answers (only for multi-correct questions)
+    const isMultiCorrect = correctAnswers.length > 1;
+    const userSelectedACorrectOne = userSelections.some(idx => correctAnswers.includes(idx));
+    const isPartial = isMultiCorrect && !listsMatchExactly && userSelectedACorrectOne;
+
+    const choiceLabels = document.getElementById("optionsGroup").children;
+    for(let idx = 0; idx < choiceLabels.length; idx++) {
+       const currentCard = choiceLabels[idx];
+       const isCorrectAnswer = correctAnswers.includes(idx);
+       const wasChosenByStudent = userSelections.includes(idx);
+
+       if (isCorrectAnswer && wasChosenByStudent) {
+          // User picked a correct answer
+          if (isPartial) {
+            // Partial match — yellow
+            currentCard.style.background = "var(--green-bg)";
+            currentCard.style.borderColor = "var(--green)";
+            currentCard.querySelector('span').style.color = "var(--green)";
+            currentCard.querySelector('span').style.fontWeight = "600";
+          } else {
+            // Full correct — green
+            currentCard.style.background = "var(--green-bg)";
+            currentCard.style.borderColor = "var(--green)";
+            currentCard.querySelector('span').style.fontWeight = "600";
+          }
+       } else if (isCorrectAnswer && !wasChosenByStudent) {
+          // Missed correct answer — show it in green (so student knows the right answer)
+          currentCard.style.background = "var(--green-bg)";
+          currentCard.style.borderColor = "var(--green)";
+          currentCard.querySelector('span').style.fontWeight = "600";
+          currentCard.querySelector('span').style.color = "var(--green)";
+       } else if (wasChosenByStudent && !isCorrectAnswer) {
+          // Wrong selection — red
+          currentCard.style.background = "var(--red-bg)";
+          currentCard.style.borderColor = "var(--red)";
+          currentCard.querySelector('span').style.fontWeight = "600";
+       }
+    }
+
+    if (listsMatchExactly) {
+       matchesAccumulator++;
+    }
+
+    document.getElementById("matchesAccumulatorText").innerText = matchesAccumulator;
+
+    // ── Save progress: log this answer so the student can resume later ──
+    fetch("{% url 'quiz:save_user_answer' %}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+      body: JSON.stringify({ question_id: q.id, chosen_indices: userSelections, is_correct: listsMatchExactly })
+    }).catch(err => console.error("Progress save failed:", err));
+
+    if(q.explanation) {
+      const expNode = document.getElementById("rationalBox");
+      expNode.innerHTML = `<strong class="weight-semibold">💡 Educational Rationale:</strong><br>${q.explanation}`;
+      expNode.style.display = "block";
+    }
+
+    if(currentSavedNoteText) {
+      renderLiveNoteBox();
+    }
+
+    document.getElementById("nextBtn").style.display = "inline-flex";
+  }
+
+  function toggleNoteWorkspace() {
+    const widget = document.getElementById("noteWidgetArea");
+    widget.style.display = widget.style.display === "none" ? "block" : "none";
+    if (widget.style.display === "block") {
+      document.getElementById("questionNoteContent").value = currentSavedNoteText;
+    }
+  }
+
+  function renderLiveNoteBox() {
+    const noteBox = document.getElementById("liveSavedNoteDisplayBox");
+    noteBox.innerHTML = `<strong class="weight-semibold">📝 Your Saved Note on this Question:</strong><br>${currentSavedNoteText}`;
+    noteBox.style.display = "block";
+  }
+
+  function commitQuestionNoteAction() {
+    const q = activeQuestionsSet[indexPointer];
+    const textValue = document.getElementById("questionNoteContent").value.trim();
+
+    fetch("{% url 'quiz:save_note_api' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            question_id: q.id,
+            note: textValue
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "success") {
+            currentSavedNoteText = textValue;
+            toggleNoteWorkspace();
+            if(document.getElementById("submitVerifyBtn").style.display === "none" && currentSavedNoteText) {
+                renderLiveNoteBox();
+            } else if (!currentSavedNoteText) {
+                document.getElementById("liveSavedNoteDisplayBox").style.display = "none";
+            }
+        } else {
+            alert("Error saving note: " + data.message);
+        }
+    });
+  }
+
+  function advanceItem() {
+    indexPointer++;
+    if(indexPointer < activeQuestionsSet.length) {
+      renderActiveQuestion();
+    } else {
+      document.getElementById("blueProgressBar").style.width = "100%";
+      document.getElementById("quizWorkspace").innerHTML = `
+        <div style="text-align:center; padding:60px 20px;">
+          <div style="font-size: 64px; margin-bottom: 24px;">🏆</div>
+          <h2 class="weight-semibold" style="font-size:32px; color:var(--dark-navy); margin-bottom: 12px;">Session Complete!</h2>
+          <p class="weight-regular" style="margin:0 0 32px; color:var(--text-muted); font-size: 1.1rem;">You correctly answered <strong class="weight-semibold" style="color:var(--dark-navy);">${matchesAccumulator}</strong> out of <strong class="weight-semibold" style="color:var(--dark-navy);">${activeQuestionsSet.length}</strong> items.</p>
+          <a href="{% url 'quiz:dashboard' %}" class="btn-custom btn-primary-custom" style="padding: 14px 48px;">Return to Portal Dashboard</a>
+        </div>
+      `;
+    }
+  }
+  
+  window.addEventListener('resize', () => {
+    if (document.getElementById("sliderFilterWrapper").style.display !== "none") {
+      renderSliderTicks();
+    }
+  });
+</script>
+{% endblock %}

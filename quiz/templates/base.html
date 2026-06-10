@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}MedQuiz — Platform{% endblock %}</title>
+  
+  <!-- Tab Bar Icon (Favicon) -->
+  <link rel="icon" type="image/png" href="https://www.image2url.com/r2/default/images/1781065542867-f07b1f87-be0a-4aaf-99ee-19d1af26cc3d.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-blue: #387CEE;
+      --dark-navy:    #02013A;
+      --bg-light:     #F8FAFC;
+      --white:        #FFFFFF;
+      --text-main:    var(--dark-navy);
+      --text-muted:   rgba(2, 1, 58, 0.6);
+      --blue-light:   rgba(56, 124, 238, 0.1);
+      --border-color: rgba(2, 1, 58, 0.1);
+      
+      /* PP Mori Fallback */
+      --font-family:  'PP Mori', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      
+      --r-sm:         8px;
+      --r-md:         12px;
+      --r-lg:         24px;
+      --r-pill:       100px;
+
+      --shadow-card:  0 4px 20px rgba(2, 1, 58, 0.05);
+      --shadow-btn:   0 8px 24px rgba(56, 124, 238, 0.2);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: var(--font-family);
+      font-size: 16px;
+      color: var(--text-main);
+      background: var(--bg-light);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .navbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: 72px;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-inner {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-family);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      border-radius: var(--r-pill);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary-blue);
+      color: var(--white);
+      padding: 10px 24px;
+      box-shadow: var(--shadow-btn);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 8px 20px;
+      font-size: 0.85rem;
+    }
+
+    .btn-logout:hover {
+      background: var(--bg-light);
+      color: var(--dark-navy);
+      border-color: var(--dark-navy);
+    }
+    
+    .weight-extralight { font-weight: 200; }
+    .weight-regular { font-weight: 400; }
+    .weight-semibold { font-weight: 600; }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 32px;
+    }
+  </style>
+</head>
+<body>
+
+  {% if user.is_authenticated %}
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="{% url 'quiz:dashboard' %}" class="nav-logo-link">
+        <img src="https://www.image2url.com/r2/default/images/1780838058428-1cc339d4-b537-4b1d-aa0a-5295455779f4.png"
+             alt="Vitalia MedQuiz"
+             style="height: 160px; width: auto; display: block; object-fit: contain; margin-left: -20px; margin-top: 15px;">
+      </a>
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div style="text-align: right;">
+          <span class="weight-semibold" style="font-size: 0.9rem; display: block; color: var(--dark-navy);">{{ user.username }}</span>
+          <span class="weight-regular" style="font-size: 0.75rem; color: var(--text-muted);">Academic Profile</span>
+        </div>
+        <form action="{% url 'quiz:logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-logout">Log Out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+</body>
+</html>

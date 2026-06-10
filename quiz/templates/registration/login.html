@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Login — MedQuiz{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600&display=swap');
+
+  :root {
+    --primary-blue: #387CEE;
+    --dark-navy: #02013A;
+    --bg-light: #F8FAFC;
+    --white: #FFFFFF;
+    --text-main: var(--dark-navy);
+    --text-muted: rgba(2, 1, 58, 0.6);
+    --blue-light: rgba(56, 124, 238, 0.1);
+    --border-color: rgba(2, 1, 58, 0.1);
+    --font-family: 'PP Mori', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --red: #ef4444;
+    --red-bg: #fef2f2;
+  }
+
+  .login-page {
+    font-family: var(--font-family);
+    min-height: calc(100vh - 66px);
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--white);
+    border-radius: 32px;
+    box-shadow: 0 10px 40px rgba(2, 1, 58, 0.08);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .login-header {
+    background: var(--dark-navy);
+    padding: 48px 40px;
+    text-align: center;
+    color: var(--white);
+  }
+
+  .login-form {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--dark-navy);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: var(--dark-navy);
+    transition: all 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    background: var(--white);
+  }
+
+  .btn-signin {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 16px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 8px;
+  }
+
+  .btn-signin:hover {
+    opacity: 0.9;
+  }
+
+  .weight-semibold { font-weight: 600; }
+  .weight-regular { font-weight: 400; }
+  .weight-extralight { font-weight: 200; }
+</style>
+
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <h1 class="weight-semibold" style="font-size: 2rem; margin: 0 0 8px 0;">Welcome Back</h1>
+      <p class="weight-extralight" style="font-size: 1rem; color: rgba(255,255,255,0.7);">Sign in to access your portal</p>
+    </div>
+    
+    <form method="post" action="{% url 'quiz:login' %}" class="login-form">
+      {% csrf_token %}
+      
+      {% if form.errors %}
+        <div style="background: var(--red-bg); border: 1px solid var(--red); color: var(--red); padding: 14px; border-radius: 12px; font-size: 0.9rem; text-align: center;" class="weight-semibold">
+          Invalid username or password. Please try again.
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label" for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" class="form-input" placeholder="Enter your username" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_password">Password</label>
+        <input type="password" name="password" id="id_password" class="form-input" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-signin">Sign In</button>
+      
+      <div style="text-align: center; margin-top: 8px;">
+        <p class="weight-regular" style="font-size: 0.9rem; color: var(--text-muted);">
+          Protected academic access portal.
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
