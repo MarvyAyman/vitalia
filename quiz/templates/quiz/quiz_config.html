@@ -306,7 +306,7 @@
     const current = parseInt(slider.value);
     const ticks = [20, 30, 40, 50, 60];
 
-    const trackW = slider.offsetWidth || slider.getBoundingClientRect().width;
+    const trackW = slider.getBoundingClientRect().width || slider.offsetWidth;
     const thumbR = 10; 
 
     tickRow.innerHTML = ticks.map(t => {
@@ -640,10 +640,13 @@
     }
   }
   
-  window.addEventListener('resize', () => {
-    if (document.getElementById("sliderFilterWrapper").style.display !== "none") {
-      renderSliderTicks();
-    }
+  window.addEventListener('resize', renderSliderTicks);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Use setTimeout to ensure the slider has a painted width before calculating tick positions
+    setTimeout(() => {
+      updateSliderDisplayLabel();
+    }, 50);
   });
 </script>
 {% endblock %}
