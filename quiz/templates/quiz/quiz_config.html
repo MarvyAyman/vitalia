@@ -192,7 +192,7 @@
       
       <div class="form-group">
         <label class="form-label" for="courseSelect">1. Choose Course Track</label>
-        <select id="courseSelect" class="form-input" onchange="handleCourseSelectionChange()">
+        <select id="courseSelect" class="form-input" onchange="handleFiltersChange()">
           <option value="">-- Select an Active Course --</option>
           {% for crs in courses %}
             <option value="{{ crs.id }}">{{ crs.name }}</option>
@@ -200,21 +200,21 @@
         </select>
       </div>
 
-      <div class="form-group" id="moduleFilterWrapper" style="display: none;">
+      <div class="form-group">
         <label class="form-label" for="moduleSelect">2. Choose Module Focus Area</label>
-        <select id="moduleSelect" class="form-input" onchange="handleModuleSelectionChange()">
-          <option value="">-- Select a Module --</option>
+        <select id="moduleSelect" class="form-input" onchange="handleFiltersChange()">
+          <option value="">-- All Modules --</option>
         </select>
       </div>
 
-      <div class="form-group" id="lectureFilterWrapper" style="display: none;">
+      <div class="form-group">
         <label class="form-label" for="lectureSelect">3. Choose Lecture Filter Range</label>
-        <select id="lectureSelect" class="form-input" onchange="handleLectureSelectionChange()">
-          <option value="">-- Select a Lecture --</option>
+        <select id="lectureSelect" class="form-input" onchange="handleFiltersChange()">
+          <option value="">-- All Lectures --</option>
         </select>
       </div>
 
-      <div class="form-group" id="sliderFilterWrapper" style="display: none; margin-top: 10px;">
+      <div class="form-group" style="margin-top: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
           <label class="form-label" for="questionVolumeSlider" style="margin: 0;">4. Assessment Length</label>
           <span id="sliderValueDisplay" class="weight-semibold" style="background: var(--blue-light); color: var(--primary-blue); padding: 6px 16px; border-radius: 8px; font-size: 0.9rem; min-width: 120px; text-align: center;">20 Questions</span>
@@ -227,13 +227,13 @@
         </div>
       </div>
 
-      <div id="actionBarWrapper" style="display: none; background: var(--bg-light); border-radius: 16px; padding: 24px; align-items: center; justify-content: space-between; margin-top: 10px; border: 1px solid var(--border-color);">
+      <div id="actionBarWrapper" style="background: var(--bg-light); border-radius: 16px; padding: 24px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; border: 1px solid var(--border-color);">
         <div>
           <h4 class="weight-semibold" style="font-size: 1rem; margin: 0 0 4px 0;">Matching Pool</h4>
-          <p class="weight-regular" style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"><span id="poolCountText" class="weight-semibold" style="color: var(--dark-navy);">0</span> questions remaining</p>
+          <p class="weight-regular" style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"><span id="poolCountText" class="weight-semibold" style="color: var(--dark-navy);">—</span> questions remaining</p>
           <p id="poolResumeNote" style="display:none; font-size: 0.82rem; color: var(--green); margin: 6px 0 0 0; font-weight: 600;"></p>
         </div>
-        <button id="startBtn" class="btn-custom btn-primary-custom" onclick="initiateExamProcess()">Launch Examination</button>
+        <button id="startBtn" class="btn-custom btn-primary-custom" onclick="initiateExamProcess()" disabled style="opacity:0.5; cursor:not-allowed;">Launch Examination</button>
       </div>
     </div>
   </div>
@@ -326,110 +326,96 @@
     }).join('');
   }
 
-  function handleCourseSelectionChange() {
+  function handleFiltersChange() {
     const courseId = document.getElementById("courseSelect").value;
+    const moduleId = document.getElementById("moduleSelect").value;
+    const lectureVal = document.getElementById("lectureSelect").value;
+
+    // No course = reset everything and disable launch
     if (!courseId) {
-      resetModuleFilterState();
-      resetLectureFilterState();
+      document.getElementById("moduleSelect").innerHTML = '<option value="">-- All Modules --</option>';
+      document.getElementById("lectureSelect").innerHTML = '<option value="">-- All Lectures --</option>';
+      document.getElementById("poolCountText").innerText = "—";
+      document.getElementById("poolResumeNote").style.display = "none";
+      setLaunchEnabled(false);
       return;
     }
 
+    // Always fetch modules when course changes (keep current module selected if still valid)
+    const modSelect = document.getElementById("moduleSelect");
+    const prevMod = modSelect.value;
     fetch(`{% url 'quiz:api_filters' %}?course=${courseId}`)
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
-        const modSelect = document.getElementById("moduleSelect");
-        const prevModuleId = modSelect.value;
-        modSelect.innerHTML = '<option value="">-- Select a Module --</option>';
+        modSelect.innerHTML = '<option value="">-- All Modules --</option>';
         data.modules.forEach(m => {
-          modSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+          modSelect.innerHTML += `<option value="${m.id}"${m.id == prevMod ? ' selected' : ''}>${m.name}</option>`;
         });
-        document.getElementById("moduleFilterWrapper").style.display = "block";
-        if (prevModuleId) {
-          modSelect.value = prevModuleId;
-          if (modSelect.value) {
-            handleModuleSelectionChange();
-            return;
-          }
-        }
-        resetLectureFilterState();
+        // Now cascade into lectures
+        fetchLectures();
       });
   }
 
-  function handleModuleSelectionChange() {
+  function fetchLectures() {
+    const courseId = document.getElementById("courseSelect").value;
     const moduleId = document.getElementById("moduleSelect").value;
+    const lecSelect = document.getElementById("lectureSelect");
+    const prevLec = lecSelect.value;
+
     if (!moduleId) {
-      resetLectureFilterState();
+      lecSelect.innerHTML = '<option value="">-- All Lectures --</option>';
+      // No module selected — pool is all lectures in this course; fetch count
+      fetchPoolCount();
       return;
     }
 
     fetch(`{% url 'quiz:api_filters' %}?module=${moduleId}`)
-      .then(res => res.json())
+      .then(r => r.json())
       .then(data => {
-        const lecSelect = document.getElementById("lectureSelect");
-        const prevLecture = lecSelect.value;
-        lecSelect.innerHTML = '<option value="">-- Select a Lecture --</option>';
+        lecSelect.innerHTML = '<option value="">-- All Lectures --</option>';
         data.lectures.forEach(l => {
-          lecSelect.innerHTML += `<option value="${l}">${l}</option>`;
+          lecSelect.innerHTML += `<option value="${l}"${l === prevLec ? ' selected' : ''}>${l}</option>`;
         });
-        document.getElementById("lectureFilterWrapper").style.display = "block";
-        if (prevLecture) {
-          lecSelect.value = prevLecture;
-          if (lecSelect.value) {
-            handleLectureSelectionChange();
-            return;
-          }
-        }
-        document.getElementById("sliderFilterWrapper").style.display = "none";
-        document.getElementById("actionBarWrapper").style.display = "none";
+        fetchPoolCount();
       });
   }
 
-  function handleLectureSelectionChange() {
-    const lectureValue = document.getElementById("lectureSelect").value;
+  function fetchPoolCount() {
     const courseId = document.getElementById("courseSelect").value;
     const moduleId = document.getElementById("moduleSelect").value;
+    const lectureVal = document.getElementById("lectureSelect").value;
 
-    if (!courseId || !moduleId || !lectureValue) {
-      document.getElementById("sliderFilterWrapper").style.display = "none";
-      document.getElementById("actionBarWrapper").style.display = "none";
-      return;
-    }
+    if (!courseId) { setLaunchEnabled(false); return; }
 
-    let checkUrl = `{% url 'quiz:exam_engine_api' %}?course=${courseId}&module=${moduleId}&lecture=${encodeURIComponent(lectureValue)}`;
-    
-    fetch(checkUrl)
-      .then(res => res.json())
+    let url = `{% url 'quiz:exam_engine_api' %}?course=${courseId}`;
+    if (moduleId) url += `&module=${moduleId}`;
+    if (lectureVal) url += `&lecture=${encodeURIComponent(lectureVal)}`;
+
+    fetch(url)
+      .then(r => r.json())
       .then(payload => {
-         if(payload.status === "success") {
-            const remaining = payload.questions.length;
-            const poolText = document.getElementById("poolCountText");
-            const poolNote = document.getElementById("poolResumeNote");
-            poolText.innerText = remaining;
-            // Show a resume note if questions were already answered (pool was filtered)
-            if (poolNote) {
-              poolNote.style.display = remaining === 0 ? "block" : "none";
-              poolNote.innerText = remaining === 0
-                ? "✅ You have completed all questions in this selection."
-                : "";
-            }
-            document.getElementById("sliderFilterWrapper").style.display = "block";
-            document.getElementById("actionBarWrapper").style.display = "flex";
-            document.getElementById("startBtn").disabled = (remaining === 0);
-            requestAnimationFrame(renderSliderTicks);
-         }
+        if (payload.status === "success") {
+          const remaining = payload.questions.length;
+          document.getElementById("poolCountText").innerText = remaining;
+          const note = document.getElementById("poolResumeNote");
+          if (remaining === 0) {
+            note.style.display = "block";
+            note.innerText = "✅ You have completed all questions in this selection.";
+          } else {
+            note.style.display = "none";
+            note.innerText = "";
+          }
+          setLaunchEnabled(remaining > 0);
+          requestAnimationFrame(renderSliderTicks);
+        }
       });
   }
 
-  function resetModuleFilterState() {
-    document.getElementById("moduleFilterWrapper").style.display = "none";
-    document.getElementById("moduleSelect").innerHTML = '<option value="">-- Select a Module --</option>';
-  }
-
-  function resetLectureFilterState() {
-    document.getElementById("lectureFilterWrapper").style.display = "none";
-    document.getElementById("sliderFilterWrapper").style.display = "none";
-    document.getElementById("actionBarWrapper").style.display = "none";
-    document.getElementById("lectureSelect").innerHTML = '<option value="">-- Select a Lecture --</option>';
+  function setLaunchEnabled(enabled) {
+    const btn = document.getElementById("startBtn");
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? "1" : "0.5";
+    btn.style.cursor = enabled ? "pointer" : "not-allowed";
   }
 
   function initiateExamProcess() {
@@ -438,7 +424,9 @@
     const lectureTitle = document.getElementById("lectureSelect").value;
     const sizeLimit = document.getElementById("questionVolumeSlider").value;
 
-    let targetUrl = `{% url 'quiz:exam_engine_api' %}?course=${crsId}&module=${modId}&lecture=${encodeURIComponent(lectureTitle)}&limit=${sizeLimit}`;
+    let targetUrl = `{% url 'quiz:exam_engine_api' %}?course=${crsId}&limit=${sizeLimit}`;
+    if (modId) targetUrl += `&module=${modId}`;
+    if (lectureTitle) targetUrl += `&lecture=${encodeURIComponent(lectureTitle)}`;
 
     fetch(targetUrl)
       .then(res => res.json())
