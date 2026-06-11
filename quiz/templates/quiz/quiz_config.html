@@ -193,16 +193,16 @@
       <div class="form-group">
         <label class="form-label">1. University</label>
         <div class="form-input" style="display: flex; align-items: center; gap: 12px; cursor: default; pointer-events: none; background: rgba(2,1,58,0.03); border-style: dashed;">
-          <span style="font-size: 1.1rem; flex-shrink: 0;">🏛️</span>
+          <!-- <span style="font-size: 1.1rem; flex-shrink: 0;">🏛️</span> -->
           <span class="weight-semibold" style="color: var(--dark-navy); flex: 1;">{{ university.name }}</span>
           <span style="background: var(--blue-light); color: var(--primary-blue); font-size: 0.72rem; font-weight: 600; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;">{{ academic_year.name }}</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="courseSelect">2. Choose Course Track</label>
+        <label class="form-label" for="courseSelect">2. Choose Unity Track</label>
         <select id="courseSelect" class="form-input" onchange="handleFiltersChange()">
-          <option value="">-- Select an Active Course --</option>
+          <option value="">-- Select an Active Unity --</option>
           {% for crs in courses %}
             <option value="{{ crs.id }}">{{ crs.name }}</option>
           {% endfor %}
