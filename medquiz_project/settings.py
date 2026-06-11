@@ -21,16 +21,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-d!1l!o-4=ja)si6ggl@8-
 # Automatically sets to False on production unless explicitly overridden
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
-
-# Dynamically white-list Render's web instance host route
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-else:
-    # Local development fallbacks
-    ALLOWED_HOSTS.extend(['127.0.0.1', 'localhost'])
-
+# Allows your platform's dynamic domains (.vercel.app or .koyeb.app) as well as local tests
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 

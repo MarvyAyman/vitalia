@@ -191,14 +191,6 @@
     <div class="card-custom" style="display: flex; flex-direction: column; gap: 28px; margin-bottom: 40px;">
       
       <div class="form-group">
-        <label class="form-label">Material Language Track</label>
-        <div style="display: flex; gap: 12px; margin-top: 8px;">
-          <button type="button" id="btnLangEN" class="btn-custom btn-outline-custom active" onclick="setLanguage('EN')">English Track</button>
-          <button type="button" id="btnLangFR" class="btn-custom btn-outline-custom" onclick="setLanguage('FR')">French Track</button>
-        </div>
-      </div>
-
-      <div class="form-group">
         <label class="form-label" for="courseSelect">1. Choose Course Track</label>
         <select id="courseSelect" class="form-input" onchange="handleCourseSelectionChange()">
           <option value="">-- Select an Active Course --</option>
@@ -294,35 +286,10 @@
 </div>
 
 <script>
-  let currentLanguage = "EN";
   let activeQuestionsSet = [];
   let indexPointer = 0;
   let matchesAccumulator = 0;
   let currentSavedNoteText = "";
-
-  function setLanguage(langCode) {
-    if (currentLanguage === langCode) return;
-    currentLanguage = langCode;
-    
-    const btnEN = document.getElementById("btnLangEN");
-    const btnFR = document.getElementById("btnLangFR");
-    
-    if (langCode === 'EN') {
-      btnEN.classList.add('active');
-      btnFR.classList.remove('active');
-    } else {
-      btnFR.classList.add('active');
-      btnEN.classList.remove('active');
-    }
-
-    const courseId = document.getElementById("courseSelect").value;
-    if (courseId) {
-      handleCourseSelectionChange();
-    } else {
-      resetModuleFilterState();
-      resetLectureFilterState();
-    }
-  }
 
   function updateSliderDisplayLabel() {
     const slider = document.getElementById("questionVolumeSlider");
@@ -367,7 +334,7 @@
       return;
     }
 
-    fetch(`{% url 'quiz:api_filters' %}?course=${courseId}&lang=${currentLanguage}`)
+    fetch(`{% url 'quiz:api_filters' %}?course=${courseId}`)
       .then(res => res.json())
       .then(data => {
         const modSelect = document.getElementById("moduleSelect");
@@ -395,7 +362,7 @@
       return;
     }
 
-    fetch(`{% url 'quiz:api_filters' %}?module=${moduleId}&lang=${currentLanguage}`)
+    fetch(`{% url 'quiz:api_filters' %}?module=${moduleId}`)
       .then(res => res.json())
       .then(data => {
         const lecSelect = document.getElementById("lectureSelect");
@@ -428,7 +395,7 @@
       return;
     }
 
-    let checkUrl = `{% url 'quiz:exam_engine_api' %}?lang=${currentLanguage}&course=${courseId}&module=${moduleId}&lecture=${encodeURIComponent(lectureValue)}`;
+    let checkUrl = `{% url 'quiz:exam_engine_api' %}?course=${courseId}&module=${moduleId}&lecture=${encodeURIComponent(lectureValue)}`;
     
     fetch(checkUrl)
       .then(res => res.json())
@@ -471,7 +438,7 @@
     const lectureTitle = document.getElementById("lectureSelect").value;
     const sizeLimit = document.getElementById("questionVolumeSlider").value;
 
-    let targetUrl = `{% url 'quiz:exam_engine_api' %}?lang=${currentLanguage}&course=${crsId}&module=${modId}&lecture=${encodeURIComponent(lectureTitle)}&limit=${sizeLimit}`;
+    let targetUrl = `{% url 'quiz:exam_engine_api' %}?course=${crsId}&module=${modId}&lecture=${encodeURIComponent(lectureTitle)}&limit=${sizeLimit}`;
 
     fetch(targetUrl)
       .then(res => res.json())
@@ -506,7 +473,11 @@
     document.getElementById("blueProgressBar").style.width = `${currentPercent}%`;
 
     document.getElementById("questionProgressText").innerText = `Question ${indexPointer + 1} of ${totalItems}`;
-    document.getElementById("questionWording").innerText = q.text;
+    
+    // Bilingual question wording — EN primary, FR secondary
+    const wordingEl = document.getElementById("questionWording");
+    wordingEl.innerHTML = q.text
+      + (q.text_fr ? `<span style="display:block; margin-top:10px; font-size:1rem; font-weight:400; color:var(--text-muted); font-style:italic;">${q.text_fr}</span>` : "");
 
     const typeBadge = document.getElementById("questionTypeBadge");
     if(q.correct_list.length > 1) {
@@ -524,13 +495,12 @@
 
     q.options.forEach((opt, idx) => {
       if(!opt) return;
-      
+      const optFr = q.options_fr && q.options_fr[idx] ? q.options_fr[idx] : "";
       const card = document.createElement("label");
       card.className = "quiz-option-card";
-      
       card.innerHTML = `
-         <input type="checkbox" value="${idx}" class="quiz-option-checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-blue); cursor: pointer;">
-         <span class="weight-regular">${String.fromCharCode(97 + idx)}. ${opt}</span>
+         <input type="checkbox" value="${idx}" class="quiz-option-checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-blue); cursor: pointer; flex-shrink:0;">
+         <span class="weight-regular">${String.fromCharCode(97 + idx)}. ${opt}${optFr ? `<span style="display:block;font-size:0.85rem;font-style:italic;color:var(--text-muted);margin-top:3px;">${optFr}</span>` : ""}</span>
       `;
       box.appendChild(card);
     });
@@ -574,19 +544,11 @@
        const wasChosenByStudent = userSelections.includes(idx);
 
        if (isCorrectAnswer && wasChosenByStudent) {
-          // User picked a correct answer
-          if (isPartial) {
-            // Partial match — yellow
-            currentCard.style.background = "var(--green-bg)";
-            currentCard.style.borderColor = "var(--green)";
-            currentCard.querySelector('span').style.color = "var(--green)";
-            currentCard.querySelector('span').style.fontWeight = "600";
-          } else {
-            // Full correct — green
-            currentCard.style.background = "var(--green-bg)";
-            currentCard.style.borderColor = "var(--green)";
-            currentCard.querySelector('span').style.fontWeight = "600";
-          }
+          // Full or partial match — always green
+          currentCard.style.background = "var(--green-bg)";
+          currentCard.style.borderColor = "var(--green)";
+          currentCard.querySelector('span').style.color = "var(--green)";
+          currentCard.querySelector('span').style.fontWeight = "600";
        } else if (isCorrectAnswer && !wasChosenByStudent) {
           // Missed correct answer — show it in green (so student knows the right answer)
           currentCard.style.background = "var(--green-bg)";
@@ -616,7 +578,8 @@
 
     if(q.explanation) {
       const expNode = document.getElementById("rationalBox");
-      expNode.innerHTML = `<strong class="weight-semibold">💡 Educational Rationale:</strong><br>${q.explanation}`;
+      expNode.innerHTML = `<strong class="weight-semibold">💡 Educational Rationale:</strong><br>${q.explanation}`
+        + (q.explanation_fr ? `<br><span style="display:block;margin-top:8px;font-style:italic;color:var(--text-muted);">${q.explanation_fr}</span>` : "");
       expNode.style.display = "block";
     }
 

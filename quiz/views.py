@@ -66,7 +66,6 @@ def api_filter_options(request):
     user_profile = request.user.profile
     course_id = request.GET.get("course")
     module_id = request.GET.get("module")
-    lang = request.GET.get("lang", "EN")
 
     data = {"modules": [], "lectures": []}
 
@@ -79,7 +78,6 @@ def api_filter_options(request):
             university=user_profile.university,
             academic_year=user_profile.allowed_year,
             module_id=module_id,
-            language=lang
         ).values_list('lecture', flat=True).distinct()
 
         data["lectures"] = list(lectures)
@@ -103,7 +101,6 @@ def start_exam_engine_api(request):
     course_id = request.GET.get("course")
     module_id = request.GET.get("module")
     lecture_title = request.GET.get("lecture")
-    lang = request.GET.get("lang", "EN")
 
     try:
         requested_limit = int(request.GET.get("limit", 20))
@@ -113,8 +110,7 @@ def start_exam_engine_api(request):
     questions_pool = Question.objects.filter(
         university=user_profile.university,
         academic_year=user_profile.allowed_year,
-        language=lang
-    ).prefetch_related("options")   # Prefetch options to avoid N+1 queries
+    ).prefetch_related("options")
 
     if course_id:
         questions_pool = questions_pool.filter(course_id=course_id)
@@ -139,6 +135,7 @@ def start_exam_engine_api(request):
         # Options ordered by pk (insertion order = the order admin added them)
         ordered_options = list(q.options.order_by("pk"))
         option_texts = [opt.text for opt in ordered_options]
+        option_texts_fr = [opt.text_fr or "" for opt in ordered_options]
 
         # Parse correct_option — accepts letters (A/a/B/b…) or numbers (1/2/3…),
         # any case, comma-separated. Both map to zero-based indices.
@@ -162,9 +159,12 @@ def start_exam_engine_api(request):
         payload.append({
             "id": q.id,
             "text": q.question_text,
-            "options": option_texts,           # Dynamic list — length matches however many options exist
-            "correct_list": correct_indices,   # Zero-based indices
-            "explanation": q.explanation or ""
+            "text_fr": q.question_text_fr or "",
+            "options": option_texts,
+            "options_fr": option_texts_fr,
+            "correct_list": correct_indices,
+            "explanation": q.explanation or "",
+            "explanation_fr": q.explanation_fr or "",
         })
 
     return JsonResponse({"status": "success", "questions": payload})
@@ -297,6 +297,7 @@ def get_random_diagnosis_case_api(request):
         {
             "order": i + 1,
             "text": hint.text,
+            "text_fr": hint.text_fr or "",
         }
         for i, hint in enumerate(case_item.hints.order_by("pk"))
     ]
@@ -316,12 +317,14 @@ def get_random_diagnosis_case_api(request):
         "title": case_item.case_title,
         "category": case_item.specialty_category,
         "description": case_item.case_description,
-        "hints": hints,          # [{order, text}, …] — variable length
+        "description_fr": case_item.case_description_fr or "",
+        "hints": hints,
         "answer": case_item.correct_diagnosis,
+        "answer_fr": case_item.correct_diagnosis_fr or "",
         "management": case_item.prise_on_charge,
+        "management_fr": case_item.prise_on_charge_fr or "",
         "has_next": has_next,
         "has_prev": has_prev,
-        # ── Saved progress state for this student ──
         "progress": {
             "hints_unlocked_count": progress.hints_unlocked_count if progress else 0,
             "is_solved": progress.is_solved if progress else False,

@@ -283,7 +283,7 @@
           <span id="mistakeCounterLabel" class="weight-semibold" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Attempts: 0 / 6</span>
        </div>
        <h2 id="caseDisplayTitle" class="weight-semibold" style="font-size: 1.8rem; margin: 0 0 16px 0; color: var(--dark-navy);">Loading case...</h2>
-       <p id="caseDisplayDescription" class="weight-regular" style="font-size: 1.1rem; line-height: 1.7; color: var(--dark-navy); margin: 0; white-space: pre-wrap;"></p>
+       <p id="caseDisplayDescription" class="weight-regular" style="font-size: 1.1rem; line-height: 1.7; color: var(--dark-navy); margin: 0;"></p>
     </div>
 
     <div id="hintsContainerSection" style="margin-bottom: 40px;">
@@ -470,7 +470,10 @@
           
           document.getElementById("caseBadgeCategory").innerText = data.category || "General Medicine";
           document.getElementById("caseDisplayTitle").innerText = data.title;
-          document.getElementById("caseDisplayDescription").innerText = data.description;
+          // Bilingual description — EN primary, FR secondary
+          const descEl = document.getElementById("caseDisplayDescription");
+          descEl.innerHTML = data.description.replace(/\n/g, '<br>')
+            + (data.description_fr ? `<span style="display:block;margin-top:14px;font-size:0.95rem;color:var(--text-muted);font-style:italic;">${data.description_fr.replace(/\n/g,'<br>')}</span>` : "");
           buildProgressiveHintsContainerGrid(data.hints);
 
           // Restore saved progress state (Prev/Next resume logic)
@@ -657,10 +660,11 @@
      if (stripNode && activeCaseObject) {
         const hint = activeCaseObject.hints[index];
         const hintText = hint ? (hint.text || 'Indicator unboxed.') : 'Indicator unboxed.';
+        const hintTextFr = hint && hint.text_fr ? `<span style="display:block;font-size:0.85rem;font-weight:400;font-style:italic;opacity:0.8;margin-top:4px;">${hint.text_fr}</span>` : "";
         stripNode.className = "hint-rectangular-strip hint-unveiled-row weight-semibold";
         stripNode.innerHTML = `
            <span style="font-size: 1.2rem; line-height: 1;">💡</span>
-           <div>${hintText}</div>
+           <div>${hintText}${hintTextFr}</div>
         `;
      }
   }
@@ -671,21 +675,24 @@
         if(stripNode) {
            const hint = activeCaseObject.hints[i];
            const hintText = hint ? (hint.text || 'Diagnostic match.') : 'Diagnostic match.';
+           const hintTextFr = hint && hint.text_fr ? `<span style="display:block;font-size:0.85rem;font-weight:400;font-style:italic;opacity:0.8;margin-top:4px;">${hint.text_fr}</span>` : "";
            stripNode.className = "hint-rectangular-strip weight-semibold";
            stripNode.style.background = "var(--green-bg)";
            stripNode.style.borderColor = "var(--green)";
            stripNode.style.color = "var(--green)";
            stripNode.innerHTML = `
               <span style="font-size: 1.2rem; line-height: 1;">✅</span>
-              <div>${hintText}</div>
+              <div>${hintText}${hintTextFr}</div>
            `;
         }
      }
   }
 
   function openTreatmentModalWindow() {
-     document.getElementById("modalTargetDiagnosisTitle").innerText = activeCaseObject.answer;
-     document.getElementById("modalManagementStrategyText").innerText = activeCaseObject.management || 'No treatment protocol found.';
+     document.getElementById("modalTargetDiagnosisTitle").innerHTML = activeCaseObject.answer
+       + (activeCaseObject.answer_fr ? `<span style="display:block;font-size:1rem;font-weight:400;color:var(--text-muted);font-style:italic;margin-top:4px;">${activeCaseObject.answer_fr}</span>` : "");
+     document.getElementById("modalManagementStrategyText").innerHTML = (activeCaseObject.management || 'No treatment protocol found.').replace(/\n/g,'<br>')
+       + (activeCaseObject.management_fr ? `<hr style="margin:16px 0;border-color:var(--border-color);"><span style="font-style:italic;color:var(--text-muted);">${activeCaseObject.management_fr.replace(/\n/g,'<br>')}</span>` : "");
      document.getElementById("treatmentModalBackdrop").style.display = "flex";
   }
 

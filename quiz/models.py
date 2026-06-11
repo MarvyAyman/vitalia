@@ -81,21 +81,15 @@ class Module(models.Model):
 # ==============================================================
 
 class Question(models.Model):
-    LANGUAGE_CHOICES = [
-        ('EN', 'English'),
-        ('FR', 'French'),
-    ]
-
     university = models.ForeignKey(University, on_delete=models.CASCADE, related_name="questions")
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name="questions", null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="questions")
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="questions")
     lecture = models.CharField(max_length=200, verbose_name="Lecture Reference Title", db_index=True)
 
-    # Multilingual tracking field
-    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='EN', verbose_name="Item Language")
-
-    question_text = models.TextField(verbose_name="Question Wording")
+    # Bilingual content — English primary, French secondary
+    question_text = models.TextField(verbose_name="Question (English)")
+    question_text_fr = models.TextField(blank=True, null=True, verbose_name="Question (French)")
 
     correct_option = models.CharField(
         max_length=20,
@@ -103,14 +97,15 @@ class Question(models.Model):
         help_text=(
             "Use letters or numbers, separated by commas — case-insensitive. "
             "Examples: 'A', 'a', 'A,C', 'a,c', '1', '1,3'. "
-            "A = first option, B = second, C = third, and so on."
+            "A/1 = first option, B/2 = second, C/3 = third, and so on."
         )
     )
 
-    explanation = models.TextField(blank=True, null=True, verbose_name="Educational Rationale")
+    explanation = models.TextField(blank=True, null=True, verbose_name="Explanation (English)")
+    explanation_fr = models.TextField(blank=True, null=True, verbose_name="Explanation (French)")
 
     def __str__(self):
-        return f"[{self.language}] {self.question_text[:50]}..."
+        return self.question_text[:60] + "..."
 
     class Meta:
         verbose_name = "MCQ Question"
@@ -124,7 +119,8 @@ class QuestionOption(models.Model):
     uses letters (A, B, C…) or numbers (1, 2, 3…) — both accepted, case-insensitive.
     """
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="options")
-    text = models.CharField(max_length=512, verbose_name="Option Text")
+    text = models.CharField(max_length=512, verbose_name="Option Text (English)")
+    text_fr = models.CharField(max_length=512, blank=True, null=True, verbose_name="Option Text (French)")
 
     class Meta:
         verbose_name = "Question Option"
@@ -171,23 +167,35 @@ class DiagnosisCase(models.Model):
     )
 
     case_description = models.TextField(
-        verbose_name="Initial Case Presentation",
+        verbose_name="Initial Case Presentation (English)",
         help_text="Baseline status shown to the doctor immediately on game launch (Vitals, primary complaint)."
     )
-
-    # The ground truth text checked via JavaScript autocomplete mapping (.toLowerCase())
-    correct_diagnosis = models.CharField(
-        max_length=150,
-        verbose_name="Correct Medical Term Diagnosis",
-        help_text="The exact pathognomonic term. Example: 'Acute Myocardial Infarction' or 'Infarctus du myocarde'."
+    case_description_fr = models.TextField(
+        blank=True, null=True,
+        verbose_name="Initial Case Presentation (French)",
     )
 
-    # Treatment Strategy Modal / Pop-up Content
+    correct_diagnosis = models.CharField(
+        max_length=150,
+        verbose_name="Correct Diagnosis",
+        help_text="The exact term. Example: 'Acute Myocardial Infarction'."
+    )
+    correct_diagnosis_fr = models.CharField(
+        max_length=150,
+        blank=True, null=True,
+        verbose_name="Correct Diagnosis (French)",
+        help_text="French equivalent. Example: 'Infarctus du myocarde'."
+    )
+
     prise_on_charge = models.TextField(
         default="",
         blank=True,
-        verbose_name="Prise en Charge (Treatment & Management)",
-        help_text="The immediate pop-up guidance showing life-saving actions, medication guidelines, or surgical indications."
+        verbose_name="Management (English)",
+    )
+    prise_on_charge_fr = models.TextField(
+        default="",
+        blank=True,
+        verbose_name="Management (French)",
     )
 
     is_active = models.BooleanField(default=True, verbose_name="Active Status Track")
@@ -213,7 +221,8 @@ class DiagnosisHint(models.Model):
     revealed in insertion order (pk).
     """
     case = models.ForeignKey(DiagnosisCase, on_delete=models.CASCADE, related_name="hints")
-    text = models.CharField(max_length=512, verbose_name="Hint Text")
+    text = models.CharField(max_length=512, verbose_name="Hint Text (English)")
+    text_fr = models.CharField(max_length=512, blank=True, null=True, verbose_name="Hint Text (French)")
 
     class Meta:
         verbose_name = "Diagnosis Hint"

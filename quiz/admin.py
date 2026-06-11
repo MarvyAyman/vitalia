@@ -15,7 +15,7 @@ class QuestionOptionInline(admin.TabularInline):
     extra = 5
     min_num = 2
     max_num = 10
-    fields = ("text",)
+    fields = ("text", "text_fr")
     ordering = ("pk",)
 
 
@@ -24,7 +24,7 @@ class DiagnosisHintInline(admin.TabularInline):
     extra = 6
     min_num = 0
     max_num = 12
-    fields = ("text",)
+    fields = ("text", "text_fr")
     ordering = ("pk",)
 
 
@@ -67,23 +67,28 @@ class ModuleAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("question_excerpt", "university", "academic_year", "module", "lecture", "language", "option_count")
-    list_filter = ("language", "university", "academic_year", "module")
+    list_display = ("question_excerpt", "university", "academic_year", "module", "lecture", "option_count")
+    list_filter = ("university", "academic_year", "module")
     search_fields = ("question_text", "lecture")
     inlines = [QuestionOptionInline]
 
     readonly_fields = ()
     fieldsets = (
         ("Question Info", {
-            "fields": ("university", "academic_year", "course", "module", "lecture", "language")
+            "fields": ("university", "academic_year", "course", "module", "lecture")
         }),
-        ("Content", {
+        ("Content — English (Primary)", {
             "fields": ("question_text", "correct_option", "explanation"),
             "description": (
                 "Set <strong>Correct Option(s)</strong> using letters or numbers, comma-separated. "
                 "Examples: <code>A</code>, <code>a,c</code>, <code>A,C</code>, <code>1,3</code>. "
                 "A/1 = first option in the list below, B/2 = second, and so on."
             ),
+        }),
+        ("Content — French (Secondary)", {
+            "fields": ("question_text_fr", "explanation_fr"),
+            "classes": ("collapse",),
+            "description": "Optional French translation shown below the English in the quiz UI.",
         }),
     )
 
@@ -116,12 +121,20 @@ class DiagnosisCaseAdmin(admin.ModelAdmin):
         ("Case Identity", {
             "fields": ("case_title", "specialty_category", "is_active")
         }),
-        ("Clinical Scenario", {
+        ("Clinical Scenario — English (Primary)", {
             "fields": ("case_description",),
             "description": "Baseline presentation shown immediately when the case loads."
         }),
-        ("Answer & Management", {
+        ("Clinical Scenario — French (Secondary)", {
+            "fields": ("case_description_fr",),
+            "classes": ("collapse",),
+        }),
+        ("Answer & Management — English", {
             "fields": ("correct_diagnosis", "prise_on_charge"),
+        }),
+        ("Answer & Management — French", {
+            "fields": ("correct_diagnosis_fr", "prise_on_charge_fr"),
+            "classes": ("collapse",),
         }),
         ("Metadata", {
             "fields": ("created_at",),
