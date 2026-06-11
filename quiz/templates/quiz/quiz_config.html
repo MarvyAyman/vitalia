@@ -189,9 +189,18 @@
     </div>
 
     <div class="card-custom" style="display: flex; flex-direction: column; gap: 28px; margin-bottom: 40px;">
-      
+
       <div class="form-group">
-        <label class="form-label" for="courseSelect">1. Choose Unity Track</label>
+        <label class="form-label">1. University</label>
+        <div class="form-input" style="display: flex; align-items: center; gap: 12px; cursor: default; pointer-events: none; background: rgba(2,1,58,0.03); border-style: dashed;">
+          <span style="font-size: 1.1rem; flex-shrink: 0;">🏛️</span>
+          <span class="weight-semibold" style="color: var(--dark-navy); flex: 1;">{{ university.name }}</span>
+          <span style="background: var(--blue-light); color: var(--primary-blue); font-size: 0.72rem; font-weight: 600; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;">{{ academic_year.name }}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="courseSelect">2. Choose Course Track</label>
         <select id="courseSelect" class="form-input" onchange="handleFiltersChange()">
           <option value="">-- Select an Active Course --</option>
           {% for crs in courses %}
@@ -201,14 +210,14 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="moduleSelect">2. Choose Module Focus Area</label>
+        <label class="form-label" for="moduleSelect">3. Choose Module Focus Area</label>
         <select id="moduleSelect" class="form-input" onchange="handleFiltersChange()">
           <option value="">-- All Modules --</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="lectureSelect">3. Choose Lecture Filter Range</label>
+        <label class="form-label" for="lectureSelect">4. Choose Lecture Filter Range</label>
         <select id="lectureSelect" class="form-input" onchange="handleFiltersChange()">
           <option value="">-- All Lectures --</option>
         </select>
@@ -216,7 +225,7 @@
 
       <div class="form-group" style="margin-top: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <label class="form-label" for="questionVolumeSlider" style="margin: 0;">4. Assessment Length</label>
+          <label class="form-label" for="questionVolumeSlider" style="margin: 0;">5. Assessment Length</label>
           <span id="sliderValueDisplay" class="weight-semibold" style="background: var(--blue-light); color: var(--primary-blue); padding: 6px 16px; border-radius: 8px; font-size: 0.9rem; min-width: 120px; text-align: center;">20 Questions</span>
         </div>
         <div style="position: relative; padding: 10px 0;">
@@ -306,7 +315,7 @@
     const current = parseInt(slider.value);
     const ticks = [20, 30, 40, 50, 60];
 
-    const trackW = slider.getBoundingClientRect().width || slider.offsetWidth;
+    const trackW = slider.offsetWidth || slider.getBoundingClientRect().width;
     const thumbR = 10; 
 
     tickRow.innerHTML = ticks.map(t => {
@@ -640,13 +649,10 @@
     }
   }
   
-  window.addEventListener('resize', renderSliderTicks);
-
-  document.addEventListener('DOMContentLoaded', () => {
-    // Use setTimeout to ensure the slider has a painted width before calculating tick positions
-    setTimeout(() => {
-      updateSliderDisplayLabel();
-    }, 50);
+  window.addEventListener('resize', () => {
+    if (document.getElementById("sliderFilterWrapper").style.display !== "none") {
+      renderSliderTicks();
+    }
   });
 </script>
 {% endblock %}
