@@ -191,12 +191,11 @@
     <div class="card-custom" style="display: flex; flex-direction: column; gap: 28px; margin-bottom: 40px;">
 
       <div class="form-group">
-        <label class="form-label">1. University</label>
-        <div class="form-input" style="display: flex; align-items: center; gap: 12px; cursor: default; pointer-events: none; background: rgba(2,1,58,0.03); border-style: dashed;">
-          <!-- <span style="font-size: 1.1rem; flex-shrink: 0;">🏛️</span> -->
-          <span class="weight-semibold" style="color: var(--dark-navy); flex: 1;">{{ university.name }}</span>
-          <span style="background: var(--blue-light); color: var(--primary-blue); font-size: 0.72rem; font-weight: 600; padding: 4px 12px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;">{{ academic_year.name }}</span>
-        </div>
+        <label class="form-label" for="universitySelect">1. University</label>
+        <select id="universitySelect" class="form-input" disabled style="opacity: 1; cursor: default; color: var(--dark-navy); background: rgba(2,1,58,0.03);">
+          <option value="">-- Select University --</option>
+          <option value="{{ university.name }}" selected>{{ university.name }}</option>
+        </select>
       </div>
 
       <div class="form-group">
