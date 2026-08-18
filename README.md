@@ -93,9 +93,6 @@ Open the local application at:
 
 [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
-## Deployment Notes
-
-The project includes deployment-oriented configuration for dependency installation, static-file collection, and database migrations. Review the deployment script and environment variables before deploying to a production environment.
 
 ## Security Notes
 
@@ -106,7 +103,3 @@ The project includes deployment-oriented configuration for dependency installati
 - Use environment variables for production secrets.
 
 - Use a separate demo account and synthetic data for public demonstrations.
-
-## License
-
-Add a license here if you plan to publish the project for reuse. If this is a client project or contains client-owned code, confirm your publication rights before adding a license or making the repository public.
